@@ -73,7 +73,7 @@ namespace riptide_navigation {
         additionnal_twist_publisher_->publish(twist);
     }
 
-    void StableCycles::RotateUV(Eigen::Vector3d u, Eigen::Vector3d v) {
+    void StableCycles::RotateUV(Eigen::Vector3d /*u*/, Eigen::Vector3d /*v*/) {
         // Collinear constraint
         auto request = std::make_shared<riptide_msgs::srv::ConstraintArray::Request>();
 
