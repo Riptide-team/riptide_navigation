@@ -45,6 +45,12 @@ ament_target_dependencies(stable_cycles rclcpp riptide_msgs sensor_msgs)
 install(TARGETS orthogonal_controller stable_cycles DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
 
+# Install Python executables
+install(PROGRAMS
+  scripts/001-1s_1m.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
