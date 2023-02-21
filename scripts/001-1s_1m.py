@@ -13,7 +13,6 @@ from riptide_msgs.action import Depth
 class State(Enum):
     IDLE     = 0
     ACTION1M = 1
-    REACH1M  = 1
     ACTION0M = 2
 
 
@@ -82,7 +81,7 @@ class Mission(Node):
                 self.get_logger().info("Calling Action 1 m")
                 self.send_goal(1.)
                 self.state = State.ACTION1M
-            elif self.state == State.REACH1M and time.time() - self.t0 > self.duration_1m:
+            elif self.state == State.ACTION1M and time.time() - self.t0 > self.duration_1m:
                 # Call 0 m action
                 self.get_logger().info("Calling Action 0 m")
                 self.send_goal(0.)
