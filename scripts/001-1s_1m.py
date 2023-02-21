@@ -46,6 +46,7 @@ class Mission(Node):
 
     def pressure_callback(self, msg):
         self.pressure = msg.pressure
+        self.get_logger().info(f'Reading pressure {self.pressure}')
 
     def send_goal(self, order):
         goal_msg = Depth.Goal()
@@ -79,13 +80,16 @@ class Mission(Node):
         if self.p_min <= self.pressure <= self.p_max:
             if self.state == State.IDLE and self.p_min <= self.pressure:
                 # Call 1 m action
+                self.get_logger().info("Calling Action 1 m")
                 self.send_goal(1)
                 self.state = State.ACTION1M
             elif self.state == State.REACH1M and time.time() - self.t0 > self.duration_1m:
                 # Call 0 m action
+                self.get_logger().info("Calling Action 0 m")
                 self.send_goal(0)
                 self.state = State.ACTION0M
         else:
+            self.get_logger().info("State IDLE")
             self.state = State.IDLE
 
 
