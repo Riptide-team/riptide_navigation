@@ -49,7 +49,7 @@ class Mission(Node):
 
     def pressure_callback(self, msg):
         self.depth = msg.depth
-        self.get_logger().info(f'Reading pressure {self.pressure}')
+        self.get_logger().info(f'Reading pressure {self.depth}')
 
     def send_goal(self, order):
         goal_msg = Depth.Goal()
