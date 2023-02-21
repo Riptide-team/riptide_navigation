@@ -103,7 +103,6 @@ class Mission(Node):
                 self.state == State.IDLE
                 self.get_logger().info("State IDLE")
         else:
-            self.send_goal(0.)
             self.flag = False
             self.state = State.IDLE
             self.get_logger().info("State IDLE")
@@ -111,15 +110,9 @@ class Mission(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
-    minimal_subscriber = Mission()
-
-    rclpy.spin(minimal_subscriber)
-
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+    mission = Mission()
+    rclpy.spin(mission)
+    mission.destroy_node()
     rclpy.shutdown()
 
 
