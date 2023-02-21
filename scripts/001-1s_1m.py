@@ -28,7 +28,7 @@ class Mission(Node):
 
         # Pressure monitoring
         self.pressure = 1013
-        self.p_min = 1000
+        self.p_min = 1050
         self.p_max = 1350
         self.subscription = self.create_subscription(
             Pressure,
@@ -69,11 +69,11 @@ class Mission(Node):
 
     def get_result_callback(self, future):
         result = future.result().result
-        self.get_logger().info('Final depth: {0}'.format(result.sequence))
+        self.get_logger().info('Final depth: {0}'.format(result.depth))
 
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
-        self.get_logger().info('Received error: {0}'.format(feedback.partial_sequence))
+        self.get_logger().info('Received error: {0}'.format(feedback.error))
 
     def loop(self):
         if self.p_min <= self.pressure <= self.p_max:
