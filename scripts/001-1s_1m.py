@@ -24,7 +24,7 @@ class Mission(Node):
         self.state = State.IDLE
 
         self.t0 = time.time()
-        self.duration_1m = 3
+        self.duration_1m = 5
 
         # Pressure monitoring
         self.pressure = 1013
@@ -88,13 +88,19 @@ class Mission(Node):
                 self.flag = False
                 self.state = State.ACTION1M
             elif self.state == State.ACTION1M and self.flag:
+                self.get_logger().info("State Wait")
                 self.t0 = time.time()
                 self.state = State.WAIT
+                self.flag = False
             elif self.state == State.WAIT and time.time() - self.t0 > self.duration_1m:
                 # Call 0 m action
                 self.get_logger().info("Calling Action 0 m")
                 self.send_goal(0.)
                 self.state = State.ACTION0M
+            elif self.state == State.ACTION0M and self.flag:
+                self.get_logger().info("State IDLE")
+                self.state == State.IDLE
+            
         else:
             self.get_logger().info("State IDLE")
             self.send_goal(0.)
