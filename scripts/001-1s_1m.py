@@ -38,7 +38,7 @@ class Mission(Node):
         )
 
         # ACtion client
-        self._action_client = ActionClient(self, Depth, '/riptide1/depth_controller/depth')
+        self._action_client = ActionClient(self, Depth, '/riptide_1/depth')
 
         # Update loop
         timer_period = 0.05  # seconds
