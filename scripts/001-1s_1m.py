@@ -27,9 +27,9 @@ class Mission(Node):
         self.duration_1m = 5
 
         # Pressure monitoring
-        self.pressure = 1013
-        self.p_min = 1050
-        self.p_max = 1350
+        self.depth = 0
+        self.d_min = 0.5
+        self.d_max = 3
         self.subscription = self.create_subscription(
             Pressure,
             '/riptide_1/pressure_broadcaster/pressure_status',
@@ -44,11 +44,11 @@ class Mission(Node):
         self.flag = False
 
         # Update loop
-        timer_period = 0.05  # seconds
+        timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.loop)
 
     def pressure_callback(self, msg):
-        self.pressure = msg.pressure
+        self.depth = msg.depth
         self.get_logger().info(f'Reading pressure {self.pressure}')
 
     def send_goal(self, order):
@@ -80,31 +80,33 @@ class Mission(Node):
         self.get_logger().info('Received error: {0}'.format(feedback.error))
 
     def loop(self):
-        if self.p_min <= self.pressure <= self.p_max:
-            if self.state == State.IDLE and self.p_min <= self.pressure:
+        if self.d_min <= self.depth <= self.d_max:
+            if self.state == State.IDLE:
                 # Call 1 m action
-                self.get_logger().info("Calling Action 1 m")
                 self.send_goal(1.)
                 self.flag = False
                 self.state = State.ACTION1M
+                self.get_logger().info("Calling Action 1 m")
             elif self.state == State.ACTION1M and self.flag:
-                self.get_logger().info("State Wait")
+                self.flag = False
                 self.t0 = time.time()
                 self.state = State.WAIT
-                self.flag = False
-            elif self.state == State.WAIT and time.time() - self.t0 > self.duration_1m:
+                self.get_logger().info("State Wait")
+            elif self.state == State.WAIT and (time.time() - self.t0) > self.duration_1m:
                 # Call 0 m action
-                self.get_logger().info("Calling Action 0 m")
                 self.send_goal(0.)
+                self.flag = False
                 self.state = State.ACTION0M
+                self.get_logger().info("Calling Action 0 m")
             elif self.state == State.ACTION0M and self.flag:
-                self.get_logger().info("State IDLE")
+                self.flag = False
                 self.state == State.IDLE
-            
+                self.get_logger().info("State IDLE")
         else:
-            self.get_logger().info("State IDLE")
             self.send_goal(0.)
+            self.flag = False
             self.state = State.IDLE
+            self.get_logger().info("State IDLE")
 
 
 def main(args=None):
