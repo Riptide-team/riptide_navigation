@@ -32,7 +32,7 @@ class Mission(Node):
         self.p_max = 1350
         self.subscription = self.create_subscription(
             Pressure,
-            '/riptide1/pressure_broadcaster/pressure_status',
+            '/riptide_1/pressure_broadcaster/pressure_status',
             self.pressure_callback,
             10
         )
