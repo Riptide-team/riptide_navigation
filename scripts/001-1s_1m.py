@@ -28,7 +28,7 @@ class Mission(Node):
 
         # Pressure monitoring
         self.pressure = 1013
-        self.p_min = 1080
+        self.p_min = 1000
         self.p_max = 1350
         self.subscription = self.create_subscription(
             Pressure,
