@@ -14,6 +14,7 @@ class State(Enum):
     IDLE     = 0
     ACTION1M = 1
     ACTION0M = 2
+    WAIT     = 3
 
 
 class Mission(Node):
@@ -36,8 +37,11 @@ class Mission(Node):
             10
         )
 
-        # ACtion client
+        # Action client
         self._action_client = ActionClient(self, Depth, '/riptide_1/depth')
+
+        # Action flag
+        self.flag = False
 
         # Update loop
         timer_period = 0.05  # seconds
@@ -69,6 +73,7 @@ class Mission(Node):
     def get_result_callback(self, future):
         result = future.result().result
         self.get_logger().info('Final depth: {0}'.format(result.depth))
+        self.flag = True
 
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
@@ -80,14 +85,19 @@ class Mission(Node):
                 # Call 1 m action
                 self.get_logger().info("Calling Action 1 m")
                 self.send_goal(1.)
+                self.flag = False
                 self.state = State.ACTION1M
-            elif self.state == State.ACTION1M and time.time() - self.t0 > self.duration_1m:
+            elif self.state == State.ACTION1M and self.flag:
+                self.t0 = time.time()
+                self.state = State.WAIT
+            elif self.state == State.WAIT and time.time() - self.t0 > self.duration_1m:
                 # Call 0 m action
                 self.get_logger().info("Calling Action 0 m")
                 self.send_goal(0.)
                 self.state = State.ACTION0M
         else:
             self.get_logger().info("State IDLE")
+            self.send_goal(0.)
             self.state = State.IDLE
 
 
