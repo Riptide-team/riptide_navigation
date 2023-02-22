@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
@@ -8,6 +9,8 @@ from enum import Enum
 from std_msgs.msg import String
 from riptide_msgs.msg import Pressure
 from riptide_msgs.action import Depth
+
+from controller_manager_msgs.srv import SwitchController
 
 
 class State(Enum):
@@ -24,7 +27,7 @@ class Mission(Node):
         self.state = State.IDLE
 
         self.t0 = time.time()
-        self.duration_1m = 5
+        self.duration_1m = 15
 
         # Pressure monitoring
         self.depth = 0
@@ -42,6 +45,9 @@ class Mission(Node):
 
         # Action flag
         self.flag = False
+
+        # Controller manager
+        self.switch_controller_srv = self.create_client(SwitchController, '/riptide_1/controller_manager')
 
         # Update loop
         timer_period = 0.5  # seconds
@@ -79,6 +85,18 @@ class Mission(Node):
         feedback = feedback_msg.feedback
         self.get_logger().info('Received error: {0}'.format(feedback.error))
 
+    def reset_actuators(self):
+        self.req = SwitchController()
+        self.req.activate_controllers = ["actuators_reset"]
+        self.req.deactivate_controllers = ["depth_controller"]
+        self.req.strictness = SwitchController.BEST_EFFORT
+        self.req.activate_asap = True
+        self.future = self.switch_controller_srv.call_async(self.req)
+        rclpy.spin_until_future_complete(self, self.future)
+
+        result = self.future.result()
+        self.get_logger().info(f"Switching controllers {result.ok}")
+
     def loop(self):
         if self.d_min <= self.depth <= self.d_max:
             if self.state == State.IDLE:
@@ -99,12 +117,12 @@ class Mission(Node):
                 self.state = State.ACTION0M
                 self.get_logger().info("Calling Action 0 m")
             elif self.state == State.ACTION0M and self.flag:
-                self.flag = False
-                self.state == State.IDLE
+                self.state = State.IDLE
+                self.reset_actuators()
                 self.get_logger().info("State IDLE")
         else:
-            self.flag = False
             self.state = State.IDLE
+            self.reset_actuators()
             self.get_logger().info("State IDLE")
 
 
