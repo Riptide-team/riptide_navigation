@@ -88,7 +88,7 @@ class Mission(Node):
 
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
-        self.get_logger().info('Received error: {0}'.format(feedback.error))
+        self.get_logger().info('Received error: {0}'.format(feedback.depth_error))
 
     def reset_actuators(self):
         self.req = SwitchController()
