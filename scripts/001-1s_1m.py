@@ -27,11 +27,11 @@ class Mission(Node):
         self.state = State.IDLE
 
         self.t0 = time.time()
-        self.duration_1m = 15
+        self.duration_1m = 30
 
         # Pressure monitoring
         self.depth = 0
-        self.d_min = 0.5
+        self.d_min = 0.25
         self.d_max = 3
         self.subscription = self.create_subscription(
             Pressure,
@@ -39,6 +39,8 @@ class Mission(Node):
             self.pressure_callback,
             10
         )
+
+        self.state_publisher = self.create_publisher(String, "~/mission/state", 10)
 
         # Action client
         self._action_client = ActionClient(self, Depth, '/riptide_1/depth')
@@ -98,32 +100,40 @@ class Mission(Node):
         self.get_logger().info(f"Switching controllers {result.ok}")
 
     def loop(self):
+        msg = String()
         if self.d_min <= self.depth <= self.d_max:
             if self.state == State.IDLE:
                 # Call 1 m action
                 self.send_goal(1.)
                 self.flag = False
                 self.state = State.ACTION1M
+                msg.data = "Action 1m"
                 self.get_logger().info("Calling Action 1 m")
             elif self.state == State.ACTION1M and self.flag:
                 self.flag = False
                 self.t0 = time.time()
                 self.state = State.WAIT
+                msg.data = f"Wait: {(time.time() - self.t0)}"
                 self.get_logger().info("State Wait")
             elif self.state == State.WAIT and (time.time() - self.t0) > self.duration_1m:
                 # Call 0 m action
                 self.send_goal(0.)
                 self.flag = False
                 self.state = State.ACTION0M
+                msg.data = "Action 0m"
                 self.get_logger().info("Calling Action 0 m")
             elif self.state == State.ACTION0M and self.flag:
                 self.state = State.IDLE
                 self.reset_actuators()
+                msg.data = "Idle"
                 self.get_logger().info("State IDLE")
         else:
             self.state = State.IDLE
             self.reset_actuators()
+            msg.data = "Idle"
             self.get_logger().info("State IDLE")
+
+        self.state_publisher.publish(msg)
 
 
 def main(args=None):
