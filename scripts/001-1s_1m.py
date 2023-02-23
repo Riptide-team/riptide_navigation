@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import rclpy
-from rclpy.duration import Duration
 from rclpy.node import Node
 from rclpy.action import ActionClient
 import time
@@ -30,11 +29,11 @@ class Mission(Node):
         self.state = State.IDLE
 
         # self.t0 = time.time()
-        self.duration = 20
+        self.duration = 20.0
 
         # Pressure monitoring
         self.depth = 0
-        self.d_min = 0.25
+        self.d_min = -0.25
         self.d_max = 3
         self.subscription = self.create_subscription(
             Pressure,
@@ -65,7 +64,7 @@ class Mission(Node):
     def send_goal(self, depth, duration):
         goal_msg = Depth.Goal()
         goal_msg.requested_depth = depth
-        goal_msg.duration = Duration(seconds=duration) 
+        goal_msg.duration = duration
 
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
@@ -84,7 +83,7 @@ class Mission(Node):
 
     def get_result_callback(self, future):
         result = future.result().result
-        self.get_logger().info(f'Final depth: {result.depth}m, {Duration.from_msg(result.elapsed_time).nanoseconds()/1e9}s')
+        self.get_logger().info(f'Final depth: {result.depth}m, {result.duration}s')
         self.flag = True
 
     def feedback_callback(self, feedback_msg):
