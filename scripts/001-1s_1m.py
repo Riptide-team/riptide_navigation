@@ -138,7 +138,7 @@ class Mission(Node):
                 self.get_logger().info("Calling Action 0m")
             elif self.state == State.ACTION0M and self.flag:
                 self.state = State.END
-                self.reset_actuators()
+                # self.reset_actuators()
                 msg.data = "End"
                 self.get_logger().info("State END")
                 self.timer.cancel()
