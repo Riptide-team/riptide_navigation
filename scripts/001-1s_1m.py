@@ -14,10 +14,12 @@ from controller_manager_msgs.srv import SwitchController
 
 
 class State(Enum):
-    IDLE     = 0
-    ACTION1M = 1
-    ACTION0M = 2
-    WAIT     = 3
+    IDLE      = 0
+    ACTION2M1 = 1
+    ACTION1M  = 2
+    ACTION2M2 = 3
+    ACTION0M  = 4
+    END       = 5
 
 
 class Mission(Node):
@@ -26,8 +28,8 @@ class Mission(Node):
         super().__init__('mission_1s_1m')
         self.state = State.IDLE
 
-        self.t0 = time.time()
-        self.duration_1m = 30
+        # self.t0 = time.time()
+        self.duration = 20
 
         # Pressure monitoring
         self.depth = 0
@@ -101,35 +103,47 @@ class Mission(Node):
 
     def loop(self):
         msg = String()
-        if self.d_min <= self.depth <= self.d_max:
+        if self.d_min <= self.depth <= self.d_max and self.state!=State.END:
             if self.state == State.IDLE:
+                # Call 2 m action
+                self.send_goal(2., self.duration)
+                self.flag = False
+                self.state = State.ACTION2M1
+                msg.data = "Action 2m"
+                self.get_logger().info("Calling Action 2m")
+            elif self.state == State.ACTION2M1 and self.flag:
+                self.flag = False
                 # Call 1 m action
-                self.send_goal(1.)
+                self.send_goal(1., self.duration)
                 self.flag = False
                 self.state = State.ACTION1M
                 msg.data = "Action 1m"
-                self.get_logger().info("Calling Action 1 m")
+                self.get_logger().info("Calling Action 1m")
             elif self.state == State.ACTION1M and self.flag:
                 self.flag = False
-                self.t0 = time.time()
-                self.state = State.WAIT
-                msg.data = f"Wait: {(time.time() - self.t0)}"
-                self.get_logger().info("State Wait")
-            elif self.state == State.WAIT and (time.time() - self.t0) > self.duration_1m:
+                # Call 2 m action
+                self.send_goal(2., self.duration)
+                self.flag = False
+                self.state = State.ACTION2M2
+                msg.data = "Action 2m"
+                self.get_logger().info("Calling Action 2m")
+            elif self.state == State.ACTION2M2 and self.flag:
+                self.flag = False
                 # Call 0 m action
-                self.send_goal(0.)
+                self.send_goal(0., self.duration)
                 self.flag = False
                 self.state = State.ACTION0M
                 msg.data = "Action 0m"
-                self.get_logger().info("Calling Action 0 m")
+                self.get_logger().info("Calling Action 0m")
             elif self.state == State.ACTION0M and self.flag:
-                self.state = State.IDLE
+                self.state = State.END
                 self.reset_actuators()
-                msg.data = "Idle"
-                self.get_logger().info("State IDLE")
+                msg.data = "End"
+                self.get_logger().info("State END")
+                self.timer.cancel()
         else:
-            self.state = State.IDLE
-            self.reset_actuators()
+            self.state = State.END
+            # self.reset_actuators()
             msg.data = "Idle"
             self.get_logger().info("State IDLE")
 
