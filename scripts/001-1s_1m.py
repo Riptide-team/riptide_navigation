@@ -82,7 +82,7 @@ class Mission(Node):
         self._get_result_future.add_done_callback(self.get_result_callback)
 
     def get_result_callback(self, future):
-        rclpy.spin_until_future_complete(self, self.future)
+        rclpy.spin_until_future_complete(self, future)
         result = future.result().result
         self.get_logger().info(f'Final depth: {result.depth}m, {result.elapsed_time}s')
 
