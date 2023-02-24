@@ -59,7 +59,7 @@ class Mission(Node):
 
     def pressure_callback(self, msg):
         self.depth = msg.depth
-        self.get_logger().info(f'Reading pressure {self.depth}')
+        # self.get_logger().info(f'Reading pressure {self.depth}')
 
     def send_goal(self, depth, duration):
         goal_msg = Depth.Goal()
@@ -113,7 +113,6 @@ class Mission(Node):
                 msg.data = "Action 2m"
                 self.get_logger().info("Calling Action 2m")
             elif self.state == State.ACTION2M1 and self.flag:
-                self.flag = False
                 # Call 1 m action
                 self.send_goal(1., self.duration)
                 self.flag = False
@@ -121,7 +120,6 @@ class Mission(Node):
                 msg.data = "Action 1m"
                 self.get_logger().info("Calling Action 1m")
             elif self.state == State.ACTION1M and self.flag:
-                self.flag = False
                 # Call 2 m action
                 self.send_goal(2., self.duration)
                 self.flag = False
@@ -129,7 +127,6 @@ class Mission(Node):
                 msg.data = "Action 2m"
                 self.get_logger().info("Calling Action 2m")
             elif self.state == State.ACTION2M2 and self.flag:
-                self.flag = False
                 # Call 0 m action
                 self.send_goal(0., self.duration)
                 self.flag = False
@@ -143,7 +140,7 @@ class Mission(Node):
                 self.get_logger().info("State END")
                 self.timer.cancel()
         else:
-            self.state = State.END
+            self.state = State.IDLE
             # self.reset_actuators()
             msg.data = "Idle"
             self.get_logger().info("State IDLE")
