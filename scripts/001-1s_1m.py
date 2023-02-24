@@ -68,11 +68,7 @@ class Mission(Node):
 
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
-
-        rclpy.spin_until_future_complete(self, self._send_goal_future)
-        self.get_logger().info("PUTTING FLAG TO TRUE")
-        self.flag = True
-        # self._send_goal_future.add_done_callback(self.goal_response_callback)
+        self._send_goal_future.add_done_callback(self.goal_response_callback)
 
     def goal_response_callback(self, future):
         goal_handle = future.result()
@@ -85,12 +81,12 @@ class Mission(Node):
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
 
-    # def get_result_callback(self, future):
-    #     result = future.result().result
-    #     self.get_logger().info(f'Final depth: {result.depth}m, {result.elapsed_time}s')
+    def get_result_callback(self, future):
+        result = future.result().result
+        self.get_logger().info(f'Final depth: {result.depth}m, {result.elapsed_time}s')
 
-    #     self.get_logger().info("PUTTING FLAG TO TRUE")
-    #     self.flag = True
+        self.get_logger().info("PUTTING FLAG TO TRUE")
+        self.flag = True
 
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
