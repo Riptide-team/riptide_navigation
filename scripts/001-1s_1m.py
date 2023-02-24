@@ -84,6 +84,7 @@ class Mission(Node):
     def get_result_callback(self, future):
         result = future.result().result
         self.get_logger().info(f'Final depth: {result.depth}m, {result.elapsed_time}s')
+        self.get_logger().info("PUTTING FLAG TO TRUE")
         self.flag = True
 
     def feedback_callback(self, feedback_msg):
