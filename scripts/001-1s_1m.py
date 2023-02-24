@@ -78,15 +78,15 @@ class Mission(Node):
 
         self.get_logger().info('Goal accepted :)')
 
-        self.get_logger().info("PUTTING FLAG TO TRUE")
-        self.flag = True
-
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
 
     def get_result_callback(self, future):
         result = future.result().result
         self.get_logger().info(f'Final depth: {result.depth}m, {result.elapsed_time}s')
+
+        self.get_logger().info("PUTTING FLAG TO TRUE")
+        self.flag = True
 
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
@@ -114,28 +114,28 @@ class Mission(Node):
                 self.state = State.ACTION2M1
                 msg.data = "Action 2m"
                 self.get_logger().info("Calling Action 2m")
-            elif self.state == State.ACTION2M1 and self.flag:
+            elif self.flag and self.state == State.ACTION2M1:
                 # Call 1 m action
                 self.send_goal(1., self.duration)
                 self.flag = False
                 self.state = State.ACTION1M
                 msg.data = "Action 1m"
                 self.get_logger().info("Calling Action 1m")
-            elif self.state == State.ACTION1M and self.flag:
+            elif self.flag and self.state == State.ACTION1M:
                 # Call 2 m action
                 self.send_goal(2., self.duration)
                 self.flag = False
                 self.state = State.ACTION2M2
                 msg.data = "Action 2m"
                 self.get_logger().info("Calling Action 2m")
-            elif self.state == State.ACTION2M2 and self.flag:
+            elif self.flag and self.state == State.ACTION2M2:
                 # Call 0 m action
                 self.send_goal(0., self.duration)
                 self.flag = False
                 self.state = State.ACTION0M
                 msg.data = "Action 0m"
                 self.get_logger().info("Calling Action 0m")
-            elif self.state == State.ACTION0M and self.flag:
+            elif self.flag and self.state == State.ACTION0M:
                 self.state = State.END
                 # self.reset_actuators()
                 msg.data = "End"
