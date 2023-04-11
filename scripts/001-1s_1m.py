@@ -29,12 +29,12 @@ class Mission(Node):
         self.state = State.IDLE
 
         # self.t0 = time.time()
-        self.duration = 20.0
+        self.duration = 10.0
 
         # Pressure monitoring
         self.depth = 0
         self.d_min = 0.25
-        self.d_max = 3
+        self.d_max = 5
         self.subscription = self.create_subscription(
             Pressure,
             '/riptide_1/pressure_broadcaster/pressure_status',
@@ -108,8 +108,9 @@ class Mission(Node):
         msg = String()
         if self.d_min <= self.depth <= self.d_max and self.state!=State.END:
             if self.state == State.IDLE:
+                self.started = True
                 # Call 2 m action
-                self.send_goal(2., self.duration)
+                self.send_goal(3., self.duration)
                 self.flag = False
                 self.state = State.ACTION2M1
                 msg.data = "Action 2m"
@@ -123,7 +124,7 @@ class Mission(Node):
                 self.get_logger().info("Calling Action 1m")
             elif self.flag and self.state == State.ACTION1M:
                 # Call 2 m action
-                self.send_goal(2., self.duration)
+                self.send_goal(3., self.duration)
                 self.flag = False
                 self.state = State.ACTION2M2
                 msg.data = "Action 2m"
@@ -142,10 +143,15 @@ class Mission(Node):
                 self.get_logger().info("State END")
                 self.timer.cancel()
         else:
-            self.state = State.IDLE
-            # self.reset_actuators()
-            msg.data = "Idle"
-            self.get_logger().info("State IDLE")
+            if self.started:
+                self.state = State.END
+                # self.reset_actuators()
+                msg.data = "END"
+                self.get_logger().info("State END")
+            else :
+                self.state = State.IDLE
+                msg.data = "Idle"
+                self.get_logger().info("State IDLE")
 
         self.state_publisher.publish(msg)
 
