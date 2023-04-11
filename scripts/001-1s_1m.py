@@ -49,6 +49,9 @@ class Mission(Node):
 
         # Action flag
         self.flag = False
+        
+        # Check if the mission started
+        self.started = False
 
         # Controller manager
         self.switch_controller_srv = self.create_client(SwitchController, '/riptide_1/controller_manager')
@@ -56,6 +59,7 @@ class Mission(Node):
         # Update loop
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.loop)
+
 
     def pressure_callback(self, msg):
         self.depth = msg.depth
