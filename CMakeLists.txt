@@ -48,6 +48,8 @@ install(DIRECTORY include/ DESTINATION include)
 # Install Python executables
 install(PROGRAMS
   scripts/001-1s_1m.py
+  scripts/002-dolphin.py
+  scripts/003-2m_1m_2m.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
