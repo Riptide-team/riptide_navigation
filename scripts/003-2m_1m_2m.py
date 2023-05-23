@@ -20,6 +20,7 @@ class State(Enum):
     ACTION2M2 = 3
     ACTION0M  = 4
     END       = 5
+    FAILSAFE  = 6
 
 
 class Mission(Node):
