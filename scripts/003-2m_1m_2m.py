@@ -58,6 +58,8 @@ class Mission(Node):
             10
         )
 
+        self.get_logger().info("Waiting for RC to give misison multiplexer time")
+
     def pressure_callback(self, msg):
         if self.state != State.FAILSAFE and msg.depth > self.d_max:
             self.get_logger().warn(f'Current pressure {msg.depth} > d_max = {self.d_max}: Aborting!')
