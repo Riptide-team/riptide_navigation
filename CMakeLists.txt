@@ -50,6 +50,7 @@ install(PROGRAMS
   scripts/001-1s_1m.py
   scripts/002-dolphin.py
   scripts/003-2m_1m_2m.py
+  scripts/004-2m_fc.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
