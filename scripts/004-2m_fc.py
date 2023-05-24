@@ -30,8 +30,8 @@ class Mission(Node):
         # Duration of each state
         self.duration = 20.0
         self.velocity = 0.5
-        self.yaw = 0
-        self.roll = 0
+        self.yaw = 0.
+        self.roll = 0.
 
         # Pressure monitoring
         self.d_max = 4
