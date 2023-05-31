@@ -13,7 +13,7 @@ class Mission(Node):
         self.angular = [1., 0., 0.]
 
         # Creating the client
-        self.controller_manager_service = '/riptide_1/controller_manager'
+        self.controller_manager_service = '/riptide_1/controller_manager/load_controller'
         self.cli = self.create_client(LoadController, self.controller_manager_service)
 
         # Waiting for the controller_manager
