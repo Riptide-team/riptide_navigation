@@ -17,7 +17,7 @@ class Mission(Node):
         self.cli = self.create_client(LoadController, self.controller_manager_service)
 
         # Waiting for the controller_manager
-        while not self.cli.wait_for_service(timeout_sec = 1.0):
+        while not self.cli.wait_for_service(timeout_sec = 100.0):
             self.get_logger().info(f'Controller manager not available at {self.controller_manager_service}')
 
         # Loading riptide_controller
