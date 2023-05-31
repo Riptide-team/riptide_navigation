@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from controller_manager_msgs.srv import LoadController, ConfigureController
+from controller_manager_msgs.srv import LoadController, ConfigureController, SwitchController
 
 class Mission(Node):
 
@@ -31,8 +31,19 @@ class Mission(Node):
         while not self.configure_controller.wait_for_service(timeout_sec = 10.0):
             self.get_logger().info(f'Controller manager not available at {self.controller_manager_service}')
 
-        # Confiuring riptide_controller
+        # Configuring riptide_controller
         self.configure_riptide_controller()
+
+        # Creating the controller activator
+        self.controller_manager_service = '/riptide_1/controller_manager/switch_controller'
+        self.switch_controller = self.create_client(SwitchController, self.controller_manager_service)
+
+        # Waiting for the controller_manager configure service
+        while not self.switch_controller.wait_for_service(timeout_sec = 10.0):
+            self.get_logger().info(f'Controller manager not available at {self.controller_manager_service}')
+
+        # Confiuring riptide_controller
+        self.switch_riptide_controller()
 
         # Twist publisher
         self.get_logger().info("Publishing Twist on `/riptide_1/riptide_controller/cmd_vel`")
@@ -53,6 +64,16 @@ class Mission(Node):
         req = ConfigureController.Request()
         req.name = "riptide_controller"
         self.future = self.configure_controller.call_async(req)
+        rclpy.spin_until_future_complete(self, self.future)
+        if not self.future.result().ok:
+            self.get_logger().fatal("Controller manager is not able to load `riptide_controller`")
+            rclpy.shutdown()
+    
+    def switch_riptide_controller(self):
+        req = SwitchController.Request()
+        req.activate_controller = ["riptide_controller"]
+        req.activate_asap = True
+        self.future = self.switch_controller.call_async(req)
         rclpy.spin_until_future_complete(self, self.future)
         if not self.future.result().ok:
             self.get_logger().fatal("Controller manager is not able to load `riptide_controller`")
