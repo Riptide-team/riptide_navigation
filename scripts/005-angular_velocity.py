@@ -71,7 +71,7 @@ class Mission(Node):
     
     def switch_riptide_controller(self):
         req = SwitchController.Request()
-        req.activate_controller = ["riptide_controller"]
+        req.activate_controllers = ["riptide_controller"]
         req.activate_asap = True
         self.future = self.switch_controller.call_async(req)
         rclpy.spin_until_future_complete(self, self.future)
