@@ -30,7 +30,7 @@ class Mission(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def load_riptide_controller(self):
-        req = LoadController()
+        req = LoadController.Request()
         req.name = "riptide_controller"
         self.future = self.cli.call_async(req)
         rclpy.spin_until_future_complete(self, self.future)
