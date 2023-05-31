@@ -51,6 +51,8 @@ install(PROGRAMS
   scripts/002-dolphin.py
   scripts/003-2m_1m_2m.py
   scripts/004-2m_fc.py
+  scripts/004-2m_fc_sim.py
+  scripts/005-angular_velocity.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
