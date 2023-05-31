@@ -25,7 +25,7 @@ class Mission(Node):
 
         # Creating the controller configurator
         self.controller_manager_service = '/riptide_1/controller_manager/configure_controller'
-        self.configure_controller = self.create_client(LoadController, self.controller_manager_service)
+        self.configure_controller = self.create_client(ConfigureController, self.controller_manager_service)
 
         # Waiting for the controller_manager configure service
         while not self.configure_controller.wait_for_service(timeout_sec = 10.0):
