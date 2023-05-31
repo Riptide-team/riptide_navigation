@@ -34,7 +34,7 @@ class Mission(Node):
         req.name = "riptide_controller"
         self.future = self.cli.call_async(req)
         rclpy.spin_until_future_complete(self, self.future)
-        if not self.future.result.ok:
+        if not self.future.result().ok:
             self.get_logger().fatal("Controller manager is not able to load `riptide_controller`")
             rclpy.shutdown()
 
