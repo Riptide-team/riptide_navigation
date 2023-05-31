@@ -2,7 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Twist
+from geometry_msgs.msg import Twist
 from controller_manager_msgs.srv import LoadController
 
 class Mission(Node):
