@@ -25,7 +25,7 @@ class Mission(Node):
 
         # Twist publisher
         self.get_logger().info("Waiting for angular velocity on `~/riptide_controller/cmd_vel`")
-        self.publisher_ = self.create_publisher(Twist, '/riptide_1//riptide_controller/cmd_vel', 10)
+        self.publisher_ = self.create_publisher(Twist, '/riptide_1/riptide_controller/cmd_vel', 10)
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
