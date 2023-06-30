@@ -9,8 +9,8 @@ class Mission(Node):
 
     def __init__(self):
         super().__init__('angular_velocity')
-        self.velocity = 0.05
-        self.angular = [1., 0., 0.]
+        self.velocity = 1.  
+        self.angular = [.1, 0., .1]
 
         # Creating the controller loader
         self.controller_manager_service = '/riptide_1/controller_manager/load_controller'
@@ -73,6 +73,7 @@ class Mission(Node):
         req = SwitchController.Request()
         req.activate_controllers = ["riptide_controller"]
         req.activate_asap = True
+        req.strictness = SwitchController.Request().BEST_EFFORT
         self.future = self.switch_controller.call_async(req)
         rclpy.spin_until_future_complete(self, self.future)
         if not self.future.result().ok:

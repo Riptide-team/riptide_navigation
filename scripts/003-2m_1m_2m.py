@@ -94,8 +94,9 @@ class Mission(Node):
 
     def get_result_callback(self, future):
         # Getting the result
-        result = future.result().result
-        self.get_logger().info(f'Final depth: {result.depth}m, {result.elapsed_time}s')
+        result = future.result()
+        if (result):
+            self.get_logger().info(f'Final depth: {result.result.depth}m, {result.result.elapsed_time}s')
 
         # Executing next fsm state
         self.execute_fsm()
@@ -109,15 +110,17 @@ class Mission(Node):
         msg = String()
         if self.state == State.FAILSAFE:
             # Canceling the current action
-            self._get_result_future.cancel()
+            if not self._get_result_future.cancelled():
+                self._get_result_future.cancel()
 
-            # Calling action 0 m during 30 seconds
-            self.send_goal(self, 0, 30)
-            
+            if self._get_result_future.done():
+                # Call 0m action for 30s
+                self.send_goal(0., 30.)
+
             # Current state
             msg.data = "FailSafe"
             self.state = State.FAILSAFE
-
+            
         elif self.state == State.IDLE:
             # Call 2 m action
             self.send_goal(2., self.duration)
