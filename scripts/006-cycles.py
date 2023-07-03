@@ -127,6 +127,10 @@ class Mission(Node):
         self.imu_msg = msg
         self.last_imu_time = Time.from_msg(msg.header.stamp)
 
+    def echosounder_callback(self, msg):
+        self.range_msg = msg
+        self.last_echosounder_time = Time.from_msg(msg.header.stamp)
+
     def pressure_callback(self, msg):
         if self.state != State.FAILSAFE and msg.depth > self.d_max:
             self.get_logger().warn(f'Current pressure {msg.depth} > d_max = {self.d_max}: Aborting!')
