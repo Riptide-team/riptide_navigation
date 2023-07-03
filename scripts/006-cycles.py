@@ -91,13 +91,21 @@ class Mission(Node):
         )
 
         # TODO add imu callback
+        # TODO add echosounder callback
+        self.last_echosounder_range = 100.
+
 
         # State publisher
         self.state_publisher = self.create_publisher(String, "~/mission/state", 10)
-        # self.state_id_publisher = self.create_publisher(Float64, "~/mission/state_id", 10)
         
         # Twits publisher
         self.twist_publisher = self.create_publisher(Twist, "~/riptide_controller/twist", 10)
+
+        # Events checker
+        self.last_time = self.get_clock().now()
+        self.events = []
+        self.event_timer = .25
+        self.timer = self.create_timer(self.event_timer, self.events_check)
 
         self.get_logger().info("Waiting for RC to give misison multiplexer time")
 
@@ -147,6 +155,13 @@ class Mission(Node):
             self.get_logger().info(f"IMU timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
             self.state_publisher.publish(msg)
 
+    def events_check(self):
+        # Iterate over events
+        for e in self.events:
+            # If an event is True execute_fsm to go into the next state
+            if e():
+                self.execute_fsm()
+
     def control_callback(self):
         msg = Twist()
         if self.state == State.FAILSAFE or self.state == State.END or self.state == State.IDLE:
@@ -183,39 +198,54 @@ class Mission(Node):
     def execute_fsm(self):
         msg = String()
         if self.state == State.FAILSAFE:
-            # Canceling the current action
-            self._get_result_future.cancel()
-
-            # Calling action 0 m during 30 seconds
-            self.send_goal(self, 0, self.duration)
-            
             # Current state
             msg.data = "FailSafe"
             self.state = State.FAILSAFE
 
-        elif self.state == State.IDLE:
-            # Call 2 m action
-            self.send_goal(2., self.duration)
-
-            # Current state
-            msg.data = "Action 2m"
-            self.state = State.ACTION2M1
-            self.get_logger().info("Calling Action 2m")
-
-        elif self.state == State.ACTION2M1:
-            # Call 0 m action
-            self.send_goal(0., self.duration)
-
-            # Current state
-            msg.data = "Action 0m"
-            self.state = State.ACTION0M
-            self.get_logger().info("Calling Action 0m")
-
-        elif self.state == State.ACTION0M:
-            # Current state
-            self.state = State.END
+        elif self.counter > self.n_cycles:
             msg.data = "END"
-            self.get_logger().info("End of the mission")
+            self.state = State.END
+            self.get_logger().info("End of mission")
+
+        elif self.state == State.IDLE:
+            # Current state
+            msg.data = "S1: Ping"
+            self.state = State.S1PING
+            self.last_time = self.get_clock().now()
+            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s1_ping_max_duration), lambda: (self.last_echosounder_range < self.s1_ping_distance_trigger)]
+            self.get_logger().info("State S1 Ping")
+
+        elif self.state == State.S1PING:
+            # Current state
+            msg.data = "S1: Solid"
+            self.state = State.S1SOLID
+            self.last_time = self.get_clock().now()
+            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s1_duration)]
+            self.get_logger().info("State S1 Solid")
+
+        elif self.state == State.S1SOLID:
+            # Current state
+            msg.data = "S2: Ping"
+            self.state = State.S2PING
+            self.last_time = self.get_clock().now()
+            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s2_ping_max_duration), lambda: (self.last_echosounder_range < self.s2_ping_distance_trigger)]
+            self.get_logger().info("State S2 Ping")
+        
+        elif self.state == State.S2PING:
+            # Current state
+            msg.data = "S2: Solid"
+            self.state = State.S2SOLID
+            self.last_time = self.get_clock().now()
+            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s2_duration)]
+            self.get_logger().info("State S2 Solid")
+
+        elif self.state == State.S2SOLID:
+            self.counter += 1
+            # Current state
+            self.state = State.S1PING
+            self.last_time = self.get_clock().now()
+            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s1_ping_max_duration), lambda: (self.last_echosounder_range < self.s1_ping_distance_trigger)]
+            self.get_logger().info("State S1 Ping")
 
         # Publishing the current state
         self.state_publisher.publish(msg)
