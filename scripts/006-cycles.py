@@ -41,7 +41,7 @@ class Mission(Node):
         self.state = State.IDLE
 
         # General robot control
-        self.velocity = 0.5
+        self.velocity = 0.05
         self.roll = 0.
         self.n_cycles = 3
         self.depth = 1.0
