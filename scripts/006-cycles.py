@@ -66,7 +66,7 @@ class Mission(Node):
         self.last_echosounder_time = self.get_clock().now()
         self.last_pressure_time = self.get_clock().now()
         self.last_imu_time = self.get_clock().now()
-        self.timer = self.create_timer(self.failsafe_check_timeout, self.failsafe_check)
+        self.failsafe_timer = self.create_timer(self.failsafe_check_timeout, self.failsafe_check)
 
         # Robot orientation (initialized to identity and then will be update with imu sensor's)
         self.R = np.eye(3)
@@ -163,14 +163,17 @@ class Mission(Node):
             self.state = State.FAILSAFE
             self.get_logger().info(f"Echosounder timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
             self.execute_fsm()
+            self.failsafe_timer.cancel()
         elif (self.get_clock().now() - self.last_pressure_time).nanoseconds > self.failsafe_check_timeout*1e9:
             self.state = State.FAILSAFE
             self.get_logger().info(f"Pressure timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
             self.execute_fsm()
+            self.failsafe_timer.cancel()
         elif (self.get_clock().now() - self.last_imu_time).nanoseconds > self.failsafe_check_timeout*1e9:
             self.state = State.FAILSAFE
             self.get_logger().info(f"IMU timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
             self.execute_fsm()
+            self.failsafe_timer.cancel()
 
     def events_check(self):
         # Iterate over events
