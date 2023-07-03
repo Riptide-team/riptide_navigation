@@ -10,7 +10,9 @@ class Mission(Node):
     def __init__(self):
         super().__init__('angular_velocity')
         self.velocity = 1.  
-        self.angular = [.1, 0., .1]
+        self.angular = [0., 0., .1]
+
+        self.get_logger().info(f"Control Twist {self.angular}")
 
         # Creating the controller loader
         self.controller_manager_service = '/riptide_1/controller_manager/load_controller'
