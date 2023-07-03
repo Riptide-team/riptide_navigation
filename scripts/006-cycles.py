@@ -162,18 +162,18 @@ class Mission(Node):
         if (self.get_clock().now() - self.last_echosounder_time).nanoseconds > self.failsafe_check_timeout*1e9:
             self.state = State.FAILSAFE
             self.get_logger().info(f"Echosounder timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
-            self.execute_fsm()
             self.failsafe_timer.cancel()
+            self.execute_fsm()
         elif (self.get_clock().now() - self.last_pressure_time).nanoseconds > self.failsafe_check_timeout*1e9:
             self.state = State.FAILSAFE
             self.get_logger().info(f"Pressure timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
-            self.execute_fsm()
             self.failsafe_timer.cancel()
+            self.execute_fsm()
         elif (self.get_clock().now() - self.last_imu_time).nanoseconds > self.failsafe_check_timeout*1e9:
             self.state = State.FAILSAFE
             self.get_logger().info(f"IMU timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
-            self.execute_fsm()
             self.failsafe_timer.cancel()
+            self.execute_fsm()
 
     def events_check(self):
         # Iterate over events
@@ -221,6 +221,7 @@ class Mission(Node):
             # Current state
             msg.data = "FailSafe"
             self.state = State.FAILSAFE
+            self.get_logger().fatal("Failsafe")
 
         elif self.counter > self.n_cycles:
             msg.data = "END"
