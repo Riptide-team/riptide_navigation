@@ -53,6 +53,7 @@ install(PROGRAMS
   scripts/004-2m_fc.py
   # scripts/004-2m_fc_sim.py
   scripts/005-angular_velocity.py
+  scripts/006-cycles.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
