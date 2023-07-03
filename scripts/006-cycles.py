@@ -159,19 +159,19 @@ class Mission(Node):
         self.get_logger().info('Received error: {0}'.format(feedback.depth_error))
 
     def failsafe_check(self):
-        if self.time.now() - self.last_echosounder_time > self.failsafe_check_timeout:
+        if self.get_clock().now() - self.last_echosounder_time > self.failsafe_check_timeout:
             msg = String()
             msg.data = "FailSafe"
             self.state = State.FAILSAFE
             self.get_logger().info(f"Echosounder timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
             self.state_publisher.publish(msg)
-        elif self.time.now() - self.last_pressure_time > self.failsafe_check_timeout:
+        elif self.get_clock().now() - self.last_pressure_time > self.failsafe_check_timeout:
             msg = String()
             msg.data = "FailSafe"
             self.state = State.FAILSAFE
             self.get_logger().info(f"Pressure timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
             self.state_publisher.publish(msg)
-        elif self.time.now() - self.last_imu_time > self.failsafe_check_timeout:
+        elif self.get_clock().now() - self.last_imu_time > self.failsafe_check_timeout:
             msg = String()
             msg.data = "FailSafe"
             self.state = State.FAILSAFE
