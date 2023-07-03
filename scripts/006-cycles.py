@@ -11,6 +11,7 @@ from scipy.spatial.transform import Rotation as R
 
 from std_msgs.msg import String, Float64
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Imu, Range
 from riptide_msgs.msg import Pressure
 from riptide_msgs.msg import Multiplexer
 from riptide_msgs.action import FullDepth
@@ -90,10 +91,23 @@ class Mission(Node):
             10
         )
 
-        # TODO add imu callback
-        # TODO add echosounder callback
-        self.last_echosounder_range = 100.
+        # Imu callback
+        self.imu_msg = Imu()
+        self.imu_subscriber = self.create_subscription(
+            Multiplexer,
+            '/riptide_1/imu_broadcaster/imu_status',
+            self.imu_callback,
+            10
+        )
 
+        # Echosounder callback
+        self.range_msg = Range()
+        self.echosounder_subscriber = self.create_subscription(
+            Range,
+            '/riptide_1/echosounder_broadcaster/processed_altitude',
+            self.range_callback,
+            10
+        )
 
         # State publisher
         self.state_publisher = self.create_publisher(String, "~/mission/state", 10)
@@ -109,12 +123,17 @@ class Mission(Node):
 
         self.get_logger().info("Waiting for RC to give misison multiplexer time")
 
+    def imu_callback(self, msg):
+        self.imu_msg = msg
+        self.last_imu_time = Time.from_msg(msg.header.stamp)
+
     def pressure_callback(self, msg):
         if self.state != State.FAILSAFE and msg.depth > self.d_max:
             self.get_logger().warn(f'Current pressure {msg.depth} > d_max = {self.d_max}: Aborting!')
             self.state = State.FAILSAFE
             self.execute_fsm()
         self.current_depth = msg.depth
+        self.last_pressure_time = Time.from_msg(msg.header.stamp)
 
     def multiplexer_callback(self, msg):
         if self.state == State.IDLE and msg.automatic and msg.remaining_time > 5:
@@ -212,7 +231,7 @@ class Mission(Node):
             msg.data = "S1: Ping"
             self.state = State.S1PING
             self.last_time = self.get_clock().now()
-            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s1_ping_max_duration), lambda: (self.last_echosounder_range < self.s1_ping_distance_trigger)]
+            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s1_ping_max_duration), lambda: (self.range_msg.range < self.s1_ping_distance_trigger)]
             self.get_logger().info("State S1 Ping")
 
         elif self.state == State.S1PING:
@@ -228,7 +247,7 @@ class Mission(Node):
             msg.data = "S2: Ping"
             self.state = State.S2PING
             self.last_time = self.get_clock().now()
-            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s2_ping_max_duration), lambda: (self.last_echosounder_range < self.s2_ping_distance_trigger)]
+            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s2_ping_max_duration), lambda: (self.range_msg.range < self.s2_ping_distance_trigger)]
             self.get_logger().info("State S2 Ping")
         
         elif self.state == State.S2PING:
@@ -244,7 +263,7 @@ class Mission(Node):
             # Current state
             self.state = State.S1PING
             self.last_time = self.get_clock().now()
-            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s1_ping_max_duration), lambda: (self.last_echosounder_range < self.s1_ping_distance_trigger)]
+            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s1_ping_max_duration), lambda: (self.range_msg.range < self.s1_ping_distance_trigger)]
             self.get_logger().info("State S1 Ping")
 
         # Publishing the current state
