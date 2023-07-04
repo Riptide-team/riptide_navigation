@@ -214,8 +214,6 @@ class Mission(Node):
             # Compute the command to put
             w = logw(self.R.T @ Rw)
 
-            self.get_logger().info(f"w: {w}")
-
             # Filling the message
             msg.linear.x = self.velocity
             msg.angular.x = w[0, 0]
