@@ -260,7 +260,7 @@ class Mission(Node):
             msg.data = "S2: Solid"
             self.state = State.S2SOLID
             self.last_time = self.get_clock().now()
-            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s2_duration)]
+            self.events = [lambda: self.get_clock().now() > self.last_time + Duration(seconds=self.s2_duration)]
             self.get_logger().info("State S2 Solid")
 
         elif self.state == State.S2SOLID:
@@ -268,7 +268,7 @@ class Mission(Node):
             # Current state
             self.state = State.S1PING
             self.last_time = self.get_clock().now()
-            self.events = [lambda: (self.get_clock().now() > self.last_time + self.s1_ping_max_duration), lambda: (self.range_msg.range < self.s1_ping_distance_trigger)]
+            self.events = [lambda: self.get_clock().now() > self.last_time + Duration(seconds=self.s1_ping_max_duration), lambda: (self.range_msg.range < self.s1_ping_distance_trigger)]
             self.get_logger().info("State S1 Ping")
 
         # Publishing the current state
