@@ -51,13 +51,13 @@ class Mission(Node):
         self.s1_yaw = 0
         self.s1_duration = 10.0
         self.s1_ping_max_duration = 30.0
-        self.s1_ping_distance_trigger = 0.5
+        self.s1_ping_distance_trigger = 3.
 
         # State 2 configuration
         self.s2_yaw = 270
         self.s2_duration = 10.0
         self.s2_ping_max_duration = 30.0
-        self.s2_ping_distance_trigger = 0.5
+        self.s2_ping_distance_trigger = 3.
 
         # Number of cycles
         self.counter = 0
@@ -113,7 +113,9 @@ class Mission(Node):
         self.state_publisher = self.create_publisher(String, "~/mission/state", 10)
         
         # Twits publisher
+        self.control_time = 0.1
         self.twist_publisher = self.create_publisher(Twist, "~/riptide_controller/twist", 10)
+        self.control_timer = self.create_timer(self.control_time, self.control_callback)
 
         # Events checker
         self.last_time = self.get_clock().now()
