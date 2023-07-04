@@ -52,7 +52,7 @@ class Mission(Node):
 
         # State 1 configuration
         self.s1_yaw = 0
-        self.s1_duration = 10.0
+        self.s1_duration = 1000.0
         self.s1_ping_max_duration = 30.0
         self.s1_ping_distance_trigger = 3.
 
