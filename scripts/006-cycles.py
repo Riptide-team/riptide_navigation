@@ -205,7 +205,7 @@ class Mission(Node):
             depth_error = self.current_depth - self.depth
 
             depth_error_msg = Float64()
-            depth_error_msg.data = pitch_error
+            depth_error_msg.data = depth_error
             self.depth_error_publisher.publish(depth_error_msg)
 
             # Pitch error
