@@ -51,13 +51,13 @@ class Mission(Node):
         self.s1_yaw = 0
         self.s1_duration = 10.0
         self.s1_ping_max_duration = 30.0
-        self.s1_ping_distance_trigger = 3.0
+        self.s1_ping_distance_trigger = 0.5
 
         # State 2 configuration
         self.s2_yaw = 270
         self.s2_duration = 10.0
         self.s2_ping_max_duration = 30.0
-        self.s2_ping_distance_trigger = 3.0
+        self.s2_ping_distance_trigger = 0.5
 
         # Number of cycles
         self.counter = 0
