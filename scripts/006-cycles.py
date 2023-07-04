@@ -93,7 +93,7 @@ class Mission(Node):
         # Imu callback
         self.imu_msg = Imu()
         self.imu_subscriber = self.create_subscription(
-            Multiplexer,
+            Imu,
             '/riptide_1/imu_broadcaster/imu_status',
             self.imu_callback,
             10
