@@ -218,9 +218,9 @@ class Mission(Node):
 
             # Filling the message
             msg.linear.x = self.velocity
-            msg.angular.x = w[0]
-            msg.angular.y = w[1]
-            msg.angular.z = w[2]
+            msg.angular.x = w[0, 0]
+            msg.angular.y = w[1, 0]
+            msg.angular.z = w[2, 0]
         
         self.twist_publisher.publish(msg)
 
