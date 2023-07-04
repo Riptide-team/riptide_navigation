@@ -62,7 +62,7 @@ class Mission(Node):
         self.counter = 0
 
         # Messages timestamp failsafe
-        self.failsafe_check_timeout = 5.0
+        self.failsafe_check_timeout = 3.0
         self.last_echosounder_time = self.get_clock().now()
         self.last_pressure_time = self.get_clock().now()
         self.last_imu_time = self.get_clock().now()
