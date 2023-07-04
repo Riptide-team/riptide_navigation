@@ -114,7 +114,7 @@ class Mission(Node):
         
         # Twits publisher
         self.control_time = 0.1
-        self.twist_publisher = self.create_publisher(Twist, "~/riptide_controller/twist", 10)
+        self.twist_publisher = self.create_publisher(Twist, "/riptide_1/riptide_controller/twist", 10)
         self.control_timer = self.create_timer(self.control_time, self.control_callback)
 
         # Events checker
@@ -228,7 +228,7 @@ class Mission(Node):
             self.state = State.FAILSAFE
             self.get_logger().fatal("Failsafe")
 
-        elif self.counter > self.n_cycles:
+        elif self.counter >= self.n_cycles:
             msg.data = "END"
             self.state = State.END
             self.get_logger().info("End of mission")
@@ -267,6 +267,7 @@ class Mission(Node):
 
         elif self.state == State.S2SOLID:
             self.counter += 1
+            self.get_logger().info(f"Cycle counter: {self.counter}")
             # Current state
             self.state = State.S1PING
             self.last_time = self.get_clock().now()
