@@ -57,7 +57,7 @@ class Mission(Node):
         self.s1_ping_distance_trigger = 3.
 
         # State 2 configuration
-        self.s2_yaw = 270
+        self.s2_yaw = 3 * np.pi / 2
         self.s2_duration = 10.0
         self.s2_ping_max_duration = 30.0
         self.s2_ping_distance_trigger = 3.
