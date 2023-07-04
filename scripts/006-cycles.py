@@ -62,11 +62,10 @@ class Mission(Node):
         self.counter = 0
 
         # Messages timestamp failsafe
-        self.failsafe_check_timeout = 3.0
+        self.failsafe_check_timeout = 5.0
         self.last_echosounder_time = self.get_clock().now()
         self.last_pressure_time = self.get_clock().now()
         self.last_imu_time = self.get_clock().now()
-        self.failsafe_timer = self.create_timer(self.failsafe_check_timeout, self.failsafe_check)
 
         # Robot orientation (initialized to identity and then will be update with imu sensor's)
         self.R = np.eye(3)
@@ -122,6 +121,9 @@ class Mission(Node):
         self.timer = self.create_timer(self.event_timer, self.events_check)
 
         self.get_logger().info("Waiting for RC to give misison multiplexer time")
+
+        # Launching failsafe check
+        self.failsafe_timer = self.create_timer(self.failsafe_check_timeout, self.failsafe_check)
 
     def imu_callback(self, msg):
         self.imu_msg = msg
