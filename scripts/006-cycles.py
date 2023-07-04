@@ -3,6 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.time import Time
+from rclpy.duration import Duration
 
 from enum import Enum
 from scipy.linalg import logm
@@ -161,17 +162,17 @@ class Mission(Node):
         self.get_logger().info('Received error: {0}'.format(feedback.depth_error))
 
     def failsafe_check(self):
-        if (self.get_clock().now() - self.last_echosounder_time).nanoseconds > Time(self.failsafe_check_timeout):
+        if self.get_clock().now() - self.last_echosounder_time > Duration(seconds=self.failsafe_check_timeout):
             self.state = State.FAILSAFE
             self.get_logger().fatal(f"Echosounder timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
             self.failsafe_timer.cancel()
             self.execute_fsm()
-        elif (self.get_clock().now() - self.last_pressure_time).nanoseconds > Time(self.failsafe_check_timeout):
+        elif self.get_clock().now() - self.last_pressure_time > Duration(seconds=self.failsafe_check_timeout):
             self.state = State.FAILSAFE
             self.get_logger().fatal(f"Pressure timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
             self.failsafe_timer.cancel()
             self.execute_fsm()
-        elif (self.get_clock().now() - self.last_imu_time).nanoseconds > Time(self.failsafe_check_timeout):
+        elif self.get_clock().now() - self.last_imu_time > Duration(seconds=self.failsafe_check_timeout):
             self.state = State.FAILSAFE
             self.get_logger().fatal(f"IMU timestamp expired! Last message received more than {self.failsafe_check_timeout}s ago.")
             self.failsafe_timer.cancel()
@@ -235,7 +236,7 @@ class Mission(Node):
             msg.data = "S1: Ping"
             self.state = State.S1PING
             self.last_time = self.get_clock().now()
-            self.events = [lambda: (self.get_clock().now() > self.last_time + Time(self.s1_ping_max_duration)), lambda: (self.range_msg.range < self.s1_ping_distance_trigger)]
+            self.events = [lambda: (self.get_clock().now() > self.last_time + Duration(seconds=self.s1_ping_max_duration)), lambda: (self.range_msg.range < self.s1_ping_distance_trigger)]
             self.get_logger().info("State S1 Ping")
 
         elif self.state == State.S1PING:
@@ -243,7 +244,7 @@ class Mission(Node):
             msg.data = "S1: Solid"
             self.state = State.S1SOLID
             self.last_time = self.get_clock().now()
-            self.events = [lambda: (self.get_clock().now() > self.last_time + Time(self.s1_duration))]
+            self.events = [lambda: (self.get_clock().now() > self.last_time + Duration(seconds=self.s1_duration))]
             self.get_logger().info("State S1 Solid")
 
         elif self.state == State.S1SOLID:
@@ -251,7 +252,7 @@ class Mission(Node):
             msg.data = "S2: Ping"
             self.state = State.S2PING
             self.last_time = self.get_clock().now()
-            self.events = [lambda: (self.get_clock().now() > self.last_time + Time(self.s2_ping_max_duration)), lambda: (self.range_msg.range < self.s2_ping_distance_trigger)]
+            self.events = [lambda: (self.get_clock().now() > self.last_time + Duration(seconds=self.s2_ping_max_duration)), lambda: (self.range_msg.range < self.s2_ping_distance_trigger)]
             self.get_logger().info("State S2 Ping")
         
         elif self.state == State.S2PING:
