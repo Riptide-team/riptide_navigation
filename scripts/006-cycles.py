@@ -47,6 +47,9 @@ class Mission(Node):
         self.n_cycles = 3
         self.depth = 1.0
 
+        self.K_pitch = 2. / 3.
+        self.r_pitch = 0.25
+
         # State 1 configuration
         self.s1_yaw = 0
         self.s1_duration = 10.0
