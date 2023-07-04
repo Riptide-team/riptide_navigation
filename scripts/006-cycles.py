@@ -194,7 +194,7 @@ class Mission(Node):
 
     def control_callback(self):
         msg = TwistStamped()
-        msg.header.stamp = self.get_clock().now() 
+        msg.header.stamp = self.get_clock().now().to_msg()
         if self.state == State.FAILSAFE or self.state == State.END or self.state == State.IDLE:
             # Filling the message
             msg.linear.x = 0.
