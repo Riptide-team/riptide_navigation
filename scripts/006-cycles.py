@@ -71,6 +71,8 @@ class Mission(Node):
         self.last_pressure_time = self.get_clock().now()
         self.last_imu_time = self.get_clock().now()
 
+        self.current_depth = 0.
+
         # Robot orientation (initialized to identity and then will be update with imu sensor's)
         self.R = np.eye(3)
 
