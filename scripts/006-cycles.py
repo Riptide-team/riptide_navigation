@@ -117,7 +117,7 @@ class Mission(Node):
         
         # Twits publisher
         self.control_time = 0.1
-        self.twist_publisher = self.create_publisher(Twist, "/riptide_1/riptide_controller/twist", 10)
+        self.twist_publisher = self.create_publisher(Twist, "/riptide_1/riptide_controller/cmd_vel", 10)
         self.pitch_error_publisher = self.create_publisher(Float64, "~/pitch_error", 10)
         self.depth_error_publisher = self.create_publisher(Float64, "~/depth_error", 10)
         self.control_timer = self.create_timer(self.control_time, self.control_callback)
