@@ -197,10 +197,10 @@ class Mission(Node):
         msg.header.stamp = self.get_clock().now().to_msg()
         if self.state == State.FAILSAFE or self.state == State.END or self.state == State.IDLE:
             # Filling the message
-            msg.linear.x = 0.
-            msg.angular.x = 0.
-            msg.angular.y = 0.
-            msg.angular.z = 0.
+            msg.twist.linear.x = 0.
+            msg.twist.angular.x = 0.
+            msg.twist.angular.y = 0.
+            msg.twist.angular.z = 0.
         else:
             # Depth error
             depth_error = self.current_depth - self.depth
@@ -226,10 +226,10 @@ class Mission(Node):
             w = logw(self.R.T @ Rw)
 
             # Filling the message
-            msg.linear.x = self.velocity
-            msg.angular.x = w[0, 0]
-            msg.angular.y = w[1, 0]
-            msg.angular.z = w[2, 0]
+            msg.twist.linear.x = self.velocity
+            msg.twist.angular.x = w[0, 0]
+            msg.twist.angular.y = w[1, 0]
+            msg.twist.angular.z = w[2, 0]
         
         self.twist_publisher.publish(msg)
 
