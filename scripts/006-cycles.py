@@ -205,7 +205,7 @@ class Mission(Node):
             # Pitch error
             pitch_error = self.K_pitch * np.arctan(depth_error / self.r_pitch)
 
-            # Wanted rotatio matrix computing
+            # Wanted rotation matrix computing
             if self.state == State.S1PING or self.state == State.S1SOLID:
                 Rw = R.from_euler('zyx', [self.s1_yaw, pitch_error, self.roll]).as_matrix()
             else:
@@ -231,7 +231,7 @@ class Mission(Node):
             self.state = State.FAILSAFE
             self.get_logger().fatal("Failsafe")
 
-        elif self.counter >= self.n_cycles:
+        elif self.counter >= self.n_cycles and self.state != State.END:
             msg.data = "END"
             self.state = State.END
             self.get_logger().info("End of mission")
