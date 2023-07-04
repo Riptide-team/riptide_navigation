@@ -138,8 +138,7 @@ class Mission(Node):
     def imu_callback(self, msg):
         self.imu_msg = msg
         self.last_imu_time = Time.from_msg(msg.header.stamp)
-        R.from_quat(np.array([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w]))
-        self.R = R.from_quat().as_matrix()
+        self.R = R.from_quat(np.array([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w])).as_matrix()
 
     def echosounder_callback(self, msg):
         self.range_msg = msg
