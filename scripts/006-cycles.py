@@ -119,6 +119,7 @@ class Mission(Node):
         self.control_time = 0.1
         self.twist_publisher = self.create_publisher(Twist, "/riptide_1/riptide_controller/twist", 10)
         self.pitch_error_publisher = self.create_publisher(Float64, "~/pitch_error", 10)
+        self.depth_error_publisher = self.create_publisher(Float64, "~/depth_error", 10)
         self.control_timer = self.create_timer(self.control_time, self.control_callback)
 
         # Events checker
@@ -202,6 +203,10 @@ class Mission(Node):
         else:
             # Depth error
             depth_error = self.current_depth = self.depth
+
+            depth_error_msg = Float64()
+            depth_error_msg.data = pitch_error
+            self.depth_error_publisher.publish(depth_error_msg)
 
             # Pitch error
             pitch_error = self.K_pitch * np.arctan(depth_error / self.r_pitch)
