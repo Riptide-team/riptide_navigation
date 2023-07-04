@@ -11,7 +11,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 
 from std_msgs.msg import String, Float64
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 from sensor_msgs.msg import Imu, Range
 from riptide_msgs.msg import Pressure
 from riptide_msgs.msg import Multiplexer
@@ -117,7 +117,7 @@ class Mission(Node):
         
         # Twits publisher
         self.control_time = 0.1
-        self.twist_publisher = self.create_publisher(Twist, "/riptide_1/riptide_controller/cmd_vel", 10)
+        self.twist_publisher = self.create_publisher(TwistStamped, "/riptide_1/riptide_controller/cmd_vel", 10)
         self.pitch_error_publisher = self.create_publisher(Float64, "~/pitch_error", 10)
         self.depth_error_publisher = self.create_publisher(Float64, "~/depth_error", 10)
         self.control_timer = self.create_timer(self.control_time, self.control_callback)
@@ -193,7 +193,8 @@ class Mission(Node):
                 self.execute_fsm()
 
     def control_callback(self):
-        msg = Twist()
+        msg = TwistStamped()
+        msg.header.stamp = self.get_clock().now() 
         if self.state == State.FAILSAFE or self.state == State.END or self.state == State.IDLE:
             # Filling the message
             msg.linear.x = 0.
