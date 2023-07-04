@@ -118,6 +118,7 @@ class Mission(Node):
         # Twits publisher
         self.control_time = 0.1
         self.twist_publisher = self.create_publisher(Twist, "/riptide_1/riptide_controller/twist", 10)
+        self.pitch_error_publisher = self.create_publisher(Float64, "~/pitch_error", 10)
         self.control_timer = self.create_timer(self.control_time, self.control_callback)
 
         # Events checker
@@ -204,6 +205,10 @@ class Mission(Node):
 
             # Pitch error
             pitch_error = self.K_pitch * np.arctan(depth_error / self.r_pitch)
+
+            pitch_error_msg = Float64()
+            pitch_error_msg.data = pitch_error
+            self.pitch_error_publisher.publish(pitch_error_msg)
 
             # Wanted rotation matrix computing
             if self.state == State.S1PING or self.state == State.S1SOLID:
