@@ -24,8 +24,9 @@ class State(Enum):
     S1SOLID   = 2
     S2PING    = 3
     S2SOLID   = 4
-    END       = 5
-    FAILSAFE  = 6
+    DOLPHIN   = 5
+    END       = 6
+    FAILSAFE  = 7
 
 
 def adjoint_inv(A):
@@ -52,7 +53,7 @@ class Mission(Node):
 
         # State 1 configuration
         self.s1_yaw = 0
-        self.s1_duration = 1000.0
+        self.s1_duration = 10.0
         self.s1_ping_max_duration = 30.0
         self.s1_ping_distance_trigger = 3.
 
@@ -61,6 +62,10 @@ class Mission(Node):
         self.s2_duration = 10.0
         self.s2_ping_max_duration = 30.0
         self.s2_ping_distance_trigger = 3.
+
+        # Dolphin configuration
+        self.dolphin_pitch = np.pi/2 - np.pi/8
+        self.dolphin_duration = 5.
 
         # Number of cycles
         self.counter = 0
@@ -221,10 +226,16 @@ class Mission(Node):
             self.pitch_error_publisher.publish(pitch_error_msg)
 
             # Wanted rotation matrix computing
-            if self.state == State.S1PING or self.state == State.S1SOLID:
+            if self.state == State.S1PING:
                 Rw = R.from_euler('zyx', [self.s1_yaw, pitch_error, self.roll]).as_matrix()
-            else:
+            elif self.state == State.S1SOLID:
+                Rw = R.from_euler('zyx', [self.s1_yaw + np.pi, pitch_error, self.roll]).as_matrix()
+            elif self.state == State.S2PING:
                 Rw = R.from_euler('zyx', [self.s2_yaw, pitch_error, self.roll]).as_matrix()
+            elif self.state == State.S2SOLID:
+                Rw = R.from_euler('zyx', [self.s2_yaw - np.pi, pitch_error, self.roll]).as_matrix()
+            else:
+                Rw = R.from_euler('zyx', [self.s2_yaw - np.pi, self.dolphin_pitch, self.roll]).as_matrix()
 
             # Compute the command to put
             w = logw(self.R.T @ Rw)
@@ -284,6 +295,14 @@ class Mission(Node):
             self.get_logger().info("State S2 Solid")
 
         elif self.state == State.S2SOLID:
+            # Current state
+            msg.data = "Dolphin"
+            self.state = State.DOLPHIN
+            self.last_time = self.get_clock().now()
+            self.events = [lambda: self.get_clock().now() > self.last_time + Duration(seconds=self.dolphin_duration), lambda: self.current_depth < .2]
+            self.get_logger().info("State Dolphin")
+
+        elif self.state == State.DOLPHIN:
             self.counter += 1
             self.get_logger().info(f"Cycle counter: {self.counter}")
             # Current state
