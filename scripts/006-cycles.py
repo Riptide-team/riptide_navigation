@@ -202,7 +202,7 @@ class Mission(Node):
             msg.angular.z = 0.
         else:
             # Depth error
-            depth_error = self.current_depth = self.depth
+            depth_error = self.current_depth - self.depth
 
             depth_error_msg = Float64()
             depth_error_msg.data = pitch_error
