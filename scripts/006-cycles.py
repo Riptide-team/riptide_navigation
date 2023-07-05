@@ -81,9 +81,6 @@ class Mission(Node):
         # Robot orientation (initialized to identity and then will be update with imu sensor's)
         self.R = np.eye(3)
 
-        # Robot depth
-        self.depth = 0.
-
         # Pressure monitoring
         self.d_max = 4
         self.subscription = self.create_subscription(
