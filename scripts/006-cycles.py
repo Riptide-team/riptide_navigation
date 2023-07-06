@@ -112,7 +112,7 @@ class Mission(Node):
         self.range_msg = Range()
         self.echosounder_subscriber = self.create_subscription(
             Range,
-            '/riptide_1/riptide_echosounder/processed_altitude',
+            '/riptide_1/riptide_echosounder/raw_altitude',
             self.echosounder_callback,
             10
         )
