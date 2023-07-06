@@ -53,13 +53,13 @@ class Mission(Node):
         self.r_pitch = 0.25
 
         # State 1 configuration
-        self.s1_yaw = 0
+        self.s1_yaw = 0.4
         self.s1_duration = 10.0
         self.s1_ping_max_duration = 30.0
         self.s1_ping_distance_trigger = 3.
 
         # State 2 configuration
-        self.s2_yaw = 3 * np.pi / 2
+        self.s2_yaw = 0.4 + 3 * np.pi / 2
         self.s2_duration = 10.0
         self.s2_ping_max_duration = 30.0
         self.s2_ping_distance_trigger = 3.
@@ -305,7 +305,7 @@ class Mission(Node):
         elif self.state == State.S2SOLID:
             # Current state
             msg.data = "Dolphin"
-            self.state = State.DOLPHIN
+            self.state = State.S2DOLPHIN
             self.last_time = self.get_clock().now()
             self.events = [lambda: self.get_clock().now() > self.last_time + Duration(seconds=self.dolphin_duration), lambda: self.current_depth < .2]
             self.get_logger().info("State S2 Dolphin")
