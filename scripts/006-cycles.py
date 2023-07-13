@@ -44,7 +44,7 @@ class Mission(Node):
         self.state = State.IDLE
 
         # General robot control
-        self.velocity = 0.05
+        self.velocity = 0.4
         self.roll = 0.
         self.n_cycles = 3
         self.depth = 1.0
@@ -55,17 +55,17 @@ class Mission(Node):
         # State 1 configuration
         self.s1_yaw = 0.4
         self.s1_duration = 10.0
-        self.s1_ping_max_duration = 30.0
+        self.s1_ping_max_duration = 10.0
         self.s1_ping_distance_trigger = 2.
 
         # State 2 configuration
         self.s2_yaw = 0.4 + 3 * np.pi / 2
         self.s2_duration = 10.0
-        self.s2_ping_max_duration = 30.0
+        self.s2_ping_max_duration = 10.0
         self.s2_ping_distance_trigger = 2.
 
         # Dolphin configuration
-        self.dolphin_pitch = np.pi/4
+        self.dolphin_pitch = - np.pi/3
         self.dolphin_duration = 5.
 
         # Number of cycles
@@ -83,7 +83,7 @@ class Mission(Node):
         self.R = np.eye(3)
 
         # Pressure monitoring
-        self.d_max = 4
+        self.d_max = 10.
         self.subscription = self.create_subscription(
             Pressure,
             '/riptide_1/pressure_broadcaster/pressure_status',
@@ -161,20 +161,6 @@ class Mission(Node):
             self.get_logger().info(f"Launching the mission! RH is the chef for the next {msg.remaining_time}")
             self.execute_fsm()
 
-    
-    def get_result_callback(self, future):
-        # Getting the result
-        result = future.result().result
-        self.get_logger().info(f'Final depth: {result.final_depth}m, {result.final_duration}s')
-
-        # Executing next fsm state
-        self.execute_fsm()
-
-    def feedback_callback(self, feedback_msg):
-        # Getting feedback
-        feedback = feedback_msg.feedback
-        self.get_logger().info('Received error: {0}'.format(feedback.depth_error))
-
     def failsafe_check(self):
         if self.get_clock().now() - self.last_echosounder_time > Duration(seconds=self.failsafe_check_timeout):
             self.state = State.FAILSAFE
@@ -215,7 +201,8 @@ class Mission(Node):
             depth_error_msg = Float64()
             depth_error_msg.data = depth_error
             self.depth_error_publisher.publish(depth_error_msg)
-
+            
+            # WARN: Added "-" sign in pitch error since R_world and R_robot positive pitch direction are not the same
             # Pitch error
             pitch_error = self.K_pitch * np.arctan(depth_error / self.r_pitch)
 
@@ -227,18 +214,19 @@ class Mission(Node):
             if self.state == State.S1PING:
                 Rw = R.from_euler('zyx', [self.s1_yaw, pitch_error, self.roll]).as_matrix()
             elif self.state == State.S1SOLID:
-                Rw = R.from_euler('zyx', [self.s1_yaw + np.pi, pitch_error, self.roll]).as_matrix()
+                Rw = R.from_euler('zyx', [self.s1_yaw + np.pi, - pitch_error, self.roll]).as_matrix()
             elif self.state == State.S1DOLPHIN:
                 Rw = R.from_euler('zyx', [self.s1_yaw + np.pi, self.dolphin_pitch, self.roll]).as_matrix()
             elif self.state == State.S2PING:
                 Rw = R.from_euler('zyx', [self.s2_yaw, pitch_error, self.roll]).as_matrix()
             elif self.state == State.S2SOLID:
-                Rw = R.from_euler('zyx', [self.s2_yaw - np.pi, pitch_error, self.roll]).as_matrix()
+                Rw = R.from_euler('zyx', [self.s2_yaw - np.pi, - pitch_error, self.roll]).as_matrix()
             else:
                 Rw = R.from_euler('zyx', [self.s2_yaw - np.pi, self.dolphin_pitch, self.roll]).as_matrix()
 
+            # WARN np.real here to avoid imaginary part in log. Check if there is no restrictions in use
             # Compute the command to put
-            w = logw(self.R.T @ Rw)
+            w = np.real(logw(self.R.T @ Rw))
 
             # Filling the message
             msg.twist.linear.x = self.velocity
@@ -265,41 +253,41 @@ class Mission(Node):
         elif self.state == State.IDLE:
             # Current state
             msg.data = "S1: Ping"
-            self.state = State.S1PING
             self.last_time = self.get_clock().now()
             self.events = [lambda: (self.get_clock().now() > self.last_time + Duration(seconds=self.s1_ping_max_duration)), lambda: (self.range_msg.range < self.s1_ping_distance_trigger)]
+            self.state = State.S1PING
             self.get_logger().info("State S1 Ping")
 
         elif self.state == State.S1PING:
             # Current state
             msg.data = "S1: Solid"
-            self.state = State.S1SOLID
             self.last_time = self.get_clock().now()
             self.events = [lambda: (self.get_clock().now() > self.last_time + Duration(seconds=self.s1_duration))]
+            self.state = State.S1SOLID
             self.get_logger().info("State S1 Solid")
 
         elif self.state == State.S1SOLID:
             # Current state
             msg.data = "S1: Dolphin"
-            self.state = State.S1DOLPHIN
             self.last_time = self.get_clock().now()
             self.events = [lambda: self.get_clock().now() > self.last_time + Duration(seconds=self.dolphin_duration), lambda: self.current_depth < .2]
+            self.state = State.S1DOLPHIN
             self.get_logger().info("State S1 Dolphin")
 
         elif self.state == State.S1DOLPHIN:
             # Current state
             msg.data = "S2: Ping"
-            self.state = State.S2PING
             self.last_time = self.get_clock().now()
             self.events = [lambda: (self.get_clock().now() > self.last_time + Duration(seconds=self.s2_ping_max_duration)), lambda: (self.range_msg.range < self.s2_ping_distance_trigger)]
+            self.state = State.S2PING
             self.get_logger().info("State S2 Ping")
         
         elif self.state == State.S2PING:
             # Current state
             msg.data = "S2: Solid"
-            self.state = State.S2SOLID
             self.last_time = self.get_clock().now()
             self.events = [lambda: self.get_clock().now() > self.last_time + Duration(seconds=self.s2_duration)]
+            self.state = State.S2SOLID
             self.get_logger().info("State S2 Solid")
 
         elif self.state == State.S2SOLID:
