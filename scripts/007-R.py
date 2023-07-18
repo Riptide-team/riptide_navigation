@@ -70,6 +70,9 @@ class Mission(Node):
     def control_callback(self):
         msg = TwistStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
+
+        print("\n")
+        print(self.R_robot.T @ self.R_wanted)
         
         w = np.real(logw(self.R_robot.T @ self.R_wanted))
 
