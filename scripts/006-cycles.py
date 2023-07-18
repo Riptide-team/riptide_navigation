@@ -6,7 +6,7 @@ from rclpy.time import Time
 from rclpy.duration import Duration
 
 from enum import Enum
-from scipy.linalg import logm
+from scipy.linalg import logm, expm
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
@@ -21,14 +21,25 @@ from riptide_msgs.action import FullDepth
 class State(Enum):
     IDLE      = 0
     S1PING    = 1
-    S1SOLID   = 2
-    S1DOLPHIN = 3
-    S2PING    = 4
-    S2SOLID   = 5
-    S2DOLPHIN = 6
-    END       = 7
-    FAILSAFE  = 8
+    S1TURN    = 2
+    S1SOLID   = 3
+    S1DOLPHIN = 4
+    S2PING    = 5
+    S2TURN    = 6
+    S2SOLID   = 4
+    S2DOLPHIN = 8
+    END       = 9
+    FAILSAFE  = 10
 
+
+def adjoint(w):
+    if isinstance(w, (float, int)):
+        return np.array([[0,-w] , [w,0]])
+    w = w.tolist()
+    return np.array([[0,-w[2],w[1]] , [w[2],0,-w[0]] , [-w[1],w[0],0]])
+
+def expw(w):
+    return expm(adjoint(w))
 
 def adjoint_inv(A):
     return np.array([[A[2,1]],[A[0,2]],[A[1,0]]])
@@ -65,8 +76,11 @@ class Mission(Node):
         self.s2_ping_distance_trigger = 2.
 
         # Dolphin configuration
-        self.dolphin_pitch = - np.pi/3
+        self.dolphin_pitch = np.pi/3
         self.dolphin_duration = 5.
+
+        # Turn duration
+        self.turn_duration = 2.0
 
         # Number of cycles
         self.counter = 0
@@ -202,7 +216,6 @@ class Mission(Node):
             depth_error_msg.data = depth_error
             self.depth_error_publisher.publish(depth_error_msg)
             
-            # WARN: Added "-" sign in pitch error since R_world and R_robot positive pitch direction are not the same
             # Pitch error
             pitch_error = self.K_pitch * np.arctan(depth_error / self.r_pitch)
 
@@ -212,17 +225,23 @@ class Mission(Node):
 
             # Wanted rotation matrix computing
             if self.state == State.S1PING:
-                Rw = R.from_euler('zyx', [self.s1_yaw, pitch_error, self.roll]).as_matrix()
+                Rw = expw(np.array([0, 0, self.s1_yaw])) @ expw(np.array([0, pitch_error, 0])) @ expw(np.array([self.roll, 0, 0]))
+            elif self.state == State.S1TURN:
+                Rw = expw(np.array([0, 0, self.s1_yaw + np.pi/2])) @ expw(np.array([0, pitch_error, 0])) @ expw(np.array([self.roll, 0, 0]))
             elif self.state == State.S1SOLID:
-                Rw = R.from_euler('zyx', [self.s1_yaw + np.pi, - pitch_error, self.roll]).as_matrix()
+                Rw = expw(np.array([0, 0, self.s1_yaw + np.pi])) @ expw(np.array([0, pitch_error, 0])) @ expw(np.array([self.roll, 0, 0]))
             elif self.state == State.S1DOLPHIN:
-                Rw = R.from_euler('zyx', [self.s1_yaw + np.pi, self.dolphin_pitch, self.roll]).as_matrix()
+                Rw = expw(np.array([0, 0, self.s1_yaw + np.pi])) @ expw(np.array([0, self.dolphin_pitch, 0])) @ expw(np.array([self.roll, 0, 0]))
             elif self.state == State.S2PING:
-                Rw = R.from_euler('zyx', [self.s2_yaw, pitch_error, self.roll]).as_matrix()
+                Rw = expw(np.array([0, 0, self.s2_yaw])) @ expw(np.array([0, pitch_error, 0])) @ expw(np.array([self.roll, 0, 0]))
+            elif self.state == State.S2TURN:
+                Rw = expw(np.array([0, 0, self.s2_yaw - np.pi/2])) @ expw(np.array([0, pitch_error, 0])) @ expw(np.array([self.roll, 0, 0]))
             elif self.state == State.S2SOLID:
-                Rw = R.from_euler('zyx', [self.s2_yaw - np.pi, - pitch_error, self.roll]).as_matrix()
+                Rw = expw(np.array([0, 0, self.s2_yaw - np.pi])) @ expw(np.array([0, pitch_error, 0])) @ expw(np.array([self.roll, 0, 0]))
+            elif self.state == State.S2DOLPHIN:
+                Rw = expw(np.array([0, 0, self.s2_yaw - np.pi])) @ expw(np.array([0, self.dolphin_pitch, 0])) @ expw(np.array([self.roll, 0, 0]))
             else:
-                Rw = R.from_euler('zyx', [self.s2_yaw - np.pi, self.dolphin_pitch, self.roll]).as_matrix()
+                Rw = self.R
 
             # WARN np.real here to avoid imaginary part in log. Check if there is no restrictions in use
             # Compute the command to put
@@ -260,6 +279,14 @@ class Mission(Node):
 
         elif self.state == State.S1PING:
             # Current state
+            msg.data = "S1: Turn"
+            self.last_time = self.get_clock().now()
+            self.events = [lambda: (self.get_clock().now() > self.last_time + Duration(seconds=self.turn_duration))]
+            self.state = State.S1TURN
+            self.get_logger().info("State S1 Turn")
+
+        elif self.state == State.S1TURN:
+            # Current state
             msg.data = "S1: Solid"
             self.last_time = self.get_clock().now()
             self.events = [lambda: (self.get_clock().now() > self.last_time + Duration(seconds=self.s1_duration))]
@@ -281,8 +308,16 @@ class Mission(Node):
             self.events = [lambda: (self.get_clock().now() > self.last_time + Duration(seconds=self.s2_ping_max_duration)), lambda: (self.range_msg.range < self.s2_ping_distance_trigger)]
             self.state = State.S2PING
             self.get_logger().info("State S2 Ping")
-        
+
         elif self.state == State.S2PING:
+            # Current state
+            msg.data = "S2: Turn"
+            self.last_time = self.get_clock().now()
+            self.events = [lambda: self.get_clock().now() > self.last_time + Duration(seconds=self.turn_duration)]
+            self.state = State.S2TURN
+            self.get_logger().info("State S2 Turn")
+        
+        elif self.state == State.S2TURN:
             # Current state
             msg.data = "S2: Solid"
             self.last_time = self.get_clock().now()
