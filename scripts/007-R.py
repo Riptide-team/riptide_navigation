@@ -16,9 +16,9 @@ from sensor_msgs.msg import Imu
 
 def adjoint(w):
     if isinstance(w, (float, int)):
-        return array([[0,-w] , [w,0]])
+        return np.array([[0,-w] , [w,0]])
     w = w.tolist()
-    return array([[0,-w[2],w[1]] , [w[2],0,-w[0]] , [-w[1],w[0],0]])
+    return np.array([[0,-w[2],w[1]] , [w[2],0,-w[0]] , [-w[1],w[0],0]])
 
 def expw(w):
     return expm(adjoint(w))
