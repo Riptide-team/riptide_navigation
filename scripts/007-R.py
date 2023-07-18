@@ -60,7 +60,7 @@ class Mission(Node):
 
         self.control_timer = self.create_timer(self.control_time, self.control_callback)
 
-        self.get_logger().info(f"Wanted rotation as rotvec : {self.R_wanted.as_rotvec(degrees=True)}")
+        self.get_logger().info(f"Wanted rotation:\n{self.R_wanted}")
 
     def imu_callback(self, msg):
         self.imu_msg = msg
