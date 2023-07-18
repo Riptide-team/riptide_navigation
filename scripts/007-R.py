@@ -6,7 +6,7 @@ from rclpy.time import Time
 from rclpy.duration import Duration
 
 from enum import Enum
-from scipy.linalg import logm
+from scipy.linalg import logm, expm
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
@@ -14,7 +14,14 @@ from std_msgs.msg import String, Float64
 from geometry_msgs.msg import TwistStamped
 from sensor_msgs.msg import Imu
 
+def adjoint(w):
+    if isinstance(w, (float, int)):
+        return array([[0,-w] , [w,0]])
+    w = w.tolist()
+    return array([[0,-w[2],w[1]] , [w[2],0,-w[0]] , [-w[1],w[0],0]])
 
+def expw(w):
+    return expm(adjoint(w))
 
 def adjoint_inv(A):
     return np.array([[A[2,1]],[A[0,2]],[A[1,0]]])
@@ -29,7 +36,8 @@ class Mission(Node):
         super().__init__('test_R')
 
         # Wanted orientation
-        self.R_wanted = R.from_euler("zyx", [90, 0, 45], degrees=True)
+        # self.R_wanted = R.from_euler("zyx", [90, 0, 45], degrees=True)
+        self.R_wanted = expw(np.array([0, 0, np.pi/2])) @ expw(np.array([0, np.pi/4, 0])) @ expw(np.array([0, 0, 0]))
 
         # Robot orientation
         self.R_robot = np.eye(3)
