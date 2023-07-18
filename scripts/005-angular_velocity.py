@@ -2,7 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 from controller_manager_msgs.srv import LoadController, ConfigureController, SwitchController
 
 class Mission(Node):
@@ -10,7 +10,7 @@ class Mission(Node):
     def __init__(self):
         super().__init__('angular_velocity')
         self.velocity = 1.  
-        self.angular = [0., 0., .1]
+        self.angular = [0., 1., 0.]
 
         self.get_logger().info(f"Control Twist {self.angular}")
 
@@ -49,7 +49,7 @@ class Mission(Node):
 
         # Twist publisher
         self.get_logger().info("Publishing Twist on `/riptide_1/riptide_controller/cmd_vel`")
-        self.publisher_ = self.create_publisher(Twist, '/riptide_1/riptide_controller/cmd_vel', 10)
+        self.publisher_ = self.create_publisher(TwistStamped, '/riptide_1/riptide_controller/cmd_vel', 10)
         timer_period = 1.  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
@@ -83,11 +83,12 @@ class Mission(Node):
             rclpy.shutdown()
 
     def timer_callback(self):
-        msg = Twist()
-        msg.linear.x = self.velocity
-        msg.angular.x = self.angular[0]
-        msg.angular.y = self.angular[1]
-        msg.angular.z = self.angular[2]
+        msg = TwistStamped()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.twist.linear.x = self.velocity
+        msg.twist.angular.x = self.angular[0]
+        msg.twist.angular.y = self.angular[1]
+        msg.twist.angular.z = self.angular[2]
         self.publisher_.publish(msg)
 
 

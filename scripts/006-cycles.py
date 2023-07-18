@@ -55,13 +55,13 @@ class Mission(Node):
         # State 1 configuration
         self.s1_yaw = 0.4
         self.s1_duration = 10.0
-        self.s1_ping_max_duration = 10.0
+        self.s1_ping_max_duration = 30.0
         self.s1_ping_distance_trigger = 2.
 
         # State 2 configuration
         self.s2_yaw = 0.4 + 3 * np.pi / 2
         self.s2_duration = 10.0
-        self.s2_ping_max_duration = 10.0
+        self.s2_ping_max_duration = 30.0
         self.s2_ping_distance_trigger = 2.
 
         # Dolphin configuration
@@ -83,7 +83,7 @@ class Mission(Node):
         self.R = np.eye(3)
 
         # Pressure monitoring
-        self.d_max = 10.
+        self.d_max = 4
         self.subscription = self.create_subscription(
             Pressure,
             '/riptide_1/pressure_broadcaster/pressure_status',
