@@ -26,7 +26,7 @@ class State(Enum):
     S1DOLPHIN = 4
     S2PING    = 5
     S2TURN    = 6
-    S2SOLID   = 4
+    S2SOLID   = 7
     S2DOLPHIN = 8
     END       = 9
     FAILSAFE  = 10
@@ -60,8 +60,8 @@ class Mission(Node):
         self.n_cycles = 3
         self.depth = 1.0
 
-        self.K_pitch = 2. / 3.
-        self.r_pitch = 0.25
+        self.K_pitch = 2. / 5.  # pi/5 rad pitch max for 
+        self.r_pitch = 0.5      # Radius of action of .5m of depth error
 
         # State 1 configuration
         self.s1_yaw = 0.4
