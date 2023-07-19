@@ -58,7 +58,7 @@ class Mission(Node):
         self.velocity = 0.4
         self.roll = 0.
         self.n_cycles = 3
-        self.depth = 1.0
+        self.depth = .5
 
         self.K_pitch = 2. / 5.  # pi/5 rad pitch max for 
         self.r_pitch = 0.5      # Radius of action of .5m of depth error
@@ -66,13 +66,13 @@ class Mission(Node):
         # State 1 configuration
         self.s1_yaw = 0.4
         self.s1_duration = 10.0
-        self.s1_ping_max_duration = 30.0
+        self.s1_ping_max_duration = 20.0
         self.s1_ping_distance_trigger = 2.
 
         # State 2 configuration
         self.s2_yaw = 0.4 + 3 * np.pi / 2
         self.s2_duration = 10.0
-        self.s2_ping_max_duration = 30.0
+        self.s2_ping_max_duration = 20.0
         self.s2_ping_distance_trigger = 2.
 
         # Dolphin configuration
@@ -97,7 +97,7 @@ class Mission(Node):
         self.R = np.eye(3)
 
         # Pressure monitoring
-        self.d_max = 4
+        self.d_max = 4.
         self.subscription = self.create_subscription(
             Pressure,
             '/riptide_1/pressure_broadcaster/pressure_status',
