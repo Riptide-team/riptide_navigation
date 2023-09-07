@@ -34,7 +34,7 @@ class Mission(Node):
 
         # Requested depth
         self.requested_depth = 3.
-        self.timeout_depth = 10.
+        self.timeout_depth_sec = 10
 
         # Messages timestamp failsafe
         self.failsafe_check_timeout = 3.0
@@ -168,7 +168,7 @@ class Mission(Node):
         depth_msg = Depth.Goal()
 
         depth_msg.depth = self.requested_depth
-        depth_msg.timeout.sec = self.timeout_depth
+        depth_msg.timeout.sec = int(self.timeout_depth)
 
         self.depth_action_client.wait_for_server()
         self._send_goal_future = self.depth_action_client.send_goal_async(depth_msg, feedback_callback=self.depth_feedback_callback)
