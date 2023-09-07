@@ -69,7 +69,7 @@ class Mission(Node):
         self._action_client = ActionClient(self, Immerse, '/immersion_controller/immerse')
 
         # Creating the controller loader
-        self.controller_manager_service = '/controller_manager/load_controller'
+        self.controller_manager_service = '/controller_manager/switch_controller'
         self.switch_controller = self.create_client(SwitchController, self.controller_manager_service)
 
         # Waiting for the controller_manager loader service
