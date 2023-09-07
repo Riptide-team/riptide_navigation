@@ -184,8 +184,7 @@ class Mission(Node):
     def depth_feedback_callback(self, feedback_msg):
         # Getting feedback
         feedback = feedback_msg.feedback
-        # TODO
-        # self.get_logger().info('Remaining immersion time: {0}'.format(feedback.remaining_time))
+        self.get_logger().info(f"Depth feedback: remaining_time={feedback.remaining_time.sec + 1e9 * feedback.remaining_time.nanosec}s depth_error={feedback.depth_error}")
 
     def immerse_feedback_callback(self, feedback_msg):
         # Getting feedback
