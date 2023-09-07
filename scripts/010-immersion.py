@@ -57,7 +57,7 @@ class Mission(Node):
         self.imu_msg = Imu()
         self.imu_subscriber = self.create_subscription(
             Imu,
-            '/imu_broadcaster/imu',
+            '/imu_sensor_broadcaster/imu',
             self.imu_callback,
             10
         )
