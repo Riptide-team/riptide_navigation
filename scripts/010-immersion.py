@@ -73,7 +73,7 @@ class Mission(Node):
         self.switch_controller = self.create_client(SwitchController, self.controller_manager_service)
 
         # Waiting for the controller_manager loader service
-        while not self.load_controller.wait_for_service(timeout_sec = 10.0):
+        while not self.switch_controller.wait_for_service(timeout_sec = 10.0):
             self.get_logger().info(f'Controller manager not available at {self.controller_manager_service}')
 
         # Loading immersion_controller
