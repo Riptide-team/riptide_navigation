@@ -28,7 +28,7 @@ class State(Enum):
 class Mission(Node):
 
     def __init__(self):
-        super().__init__('010-immersion')
+        super().__init__('010_immersion')
         self.state = State.IDLE
 
         # Messages timestamp failsafe
