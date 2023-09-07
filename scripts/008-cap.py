@@ -50,14 +50,15 @@ class Mission(Node):
         # General robot control
         self.velocity = 0.4
         self.roll = 0.
-        self.depth = .5
 
-        self.K_pitch = 2. / 5.  # pi/5 rad pitch max for 
-        self.r_pitch = 0.5      # Radius of action of .5m of depth error
+        self.depth = 1.
+
+        self.K_pitch = 2. / 6.  # pi/5 rad pitch max for 
+        self.r_pitch = 0.25      # Radius of action of .5m of depth error
 
         # State 1 configuration
         self.s1_yaw = 0.4
-        self.s1_duration = 10.0
+        self.s1_duration = 30.0
         self.s1_ping_max_duration = 20.0
         self.s1_ping_distance_trigger = 2.
 

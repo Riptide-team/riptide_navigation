@@ -56,6 +56,8 @@ install(PROGRAMS
   scripts/006-cycles.py
   scripts/007-R.py
   scripts/008-cap.py
+  scripts/010-immersion.py
+  scripts/011-immersion_cap.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
