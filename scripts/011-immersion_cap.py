@@ -170,6 +170,8 @@ class Mission(Node):
         depth_msg.depth = self.requested_depth
         depth_msg.timeout.sec = int(self.timeout_depth_sec)
 
+        self.get_logger().info(f"Sending depth goal: depth={depth_msg.depth} timeout={depth_msg.timeout.sec}s")
+
         self.depth_action_client.wait_for_server()
         self._send_goal_future = self.depth_action_client.send_goal_async(depth_msg, feedback_callback=self.depth_feedback_callback)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
