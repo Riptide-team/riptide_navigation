@@ -152,9 +152,9 @@ class Mission(Node):
         elif self.state == State.IMMERSE:
             msg.data = "Cap"
             self.state = State.CAP
-            self.get_logger().info("State Cap")
             self.call_switch_controller(["immersion_controller"], ["riptide_controller", "log_controller", "depth_controller"])
             self.send_depth_goal()
+            self.get_logger().info("State Cap")
 
         elif self.state == State.CAP:
             msg.data = "END"
