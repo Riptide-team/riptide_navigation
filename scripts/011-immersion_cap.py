@@ -187,13 +187,17 @@ class Mission(Node):
 
         # Waiting for the action's result
         self._depth_get_result_future = goal_handle.get_result_async()
-        self._depth_get_result_future.add_done_callback(self.get_result_callback)
+        self._depth_get_result_future.add_done_callback(self.depth_get_result_callback)
 
     def depth_feedback_callback(self, feedback_msg):
         # Getting feedback
         feedback = feedback_msg.feedback
+        self.get_logger().info("Feedback toto")
         self.get_logger().info(f"Depth feedback: remaining_time={feedback.remaining_time.sec + 1e-9 * feedback.remaining_time.nanosec}s depth_error={feedback.depth_error}")
 
+    def get_result_callback(self, future):
+        # Executing next fsm state
+        self.execute_fsm()
 
     # Immersion
     def send_immersion_goal(self):
@@ -218,9 +222,9 @@ class Mission(Node):
 
         # Waiting for the action's result
         self._immerse_get_result_future = goal_handle.get_result_async()
-        self._immerse_get_result_future.add_done_callback(self.get_result_callback)
+        self._immerse_get_result_future.add_done_callback(self.immerse_get_result_callback)
 
-    def get_result_callback(self, future):
+    def immerse_get_result_callback(self, future):
         # Executing next fsm state
         self.execute_fsm()
 
