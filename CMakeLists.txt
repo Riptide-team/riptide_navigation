@@ -55,6 +55,7 @@ install(PROGRAMS
   scripts/005-angular_velocity.py
   scripts/006-cycles.py
   scripts/007-R.py
+  scripts/008-cap.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
