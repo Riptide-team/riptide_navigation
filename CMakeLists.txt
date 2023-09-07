@@ -55,7 +55,11 @@ install(PROGRAMS
   scripts/005-angular_velocity.py
   scripts/006-cycles.py
   scripts/007-R.py
+<<<<<<< HEAD
   scripts/008-cap.py
+=======
+  scripts/010-immersion.py
+>>>>>>> refs/remotes/origin/main
   DESTINATION lib/${PROJECT_NAME}
 )
 
