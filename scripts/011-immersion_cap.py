@@ -173,27 +173,11 @@ class Mission(Node):
         self.get_logger().info(f"Sending depth goal: depth={depth_msg.depth} timeout={depth_msg.timeout.sec}s")
 
         self.depth_action_client.wait_for_server()
-        self._send_goal_future = self.depth_action_client.send_goal_async(depth_msg, feedback_callback=self.depth_feedback_callback)
-        self._send_goal_future.add_done_callback(self.goal_response_callback)
+        self._depth_send_goal_future = self.depth_action_client.send_goal_async(depth_msg, feedback_callback=self.depth_feedback_callback)
+        self._depth_send_goal_future.add_done_callback(self.depth_goal_response_callback)
 
-    def send_immersion_goal(self):
-        immerse_msg = Immerse.Goal()
-
-        self.immerse_action_client.wait_for_server()
-        self._send_goal_future = self.immerse_action_client.send_goal_async(immerse_msg, feedback_callback=self.immerse_feedback_callback)
-        self._send_goal_future.add_done_callback(self.goal_response_callback)
-
-    def depth_feedback_callback(self, feedback_msg):
-        # Getting feedback
-        feedback = feedback_msg.feedback
-        self.get_logger().info(f"Depth feedback: remaining_time={feedback.remaining_time.sec + 1e9 * feedback.remaining_time.nanosec}s depth_error={feedback.depth_error}")
-
-    def immerse_feedback_callback(self, feedback_msg):
-        # Getting feedback
-        feedback = feedback_msg.feedback
-        self.get_logger().info('Remaining immersion time: {0}'.format(feedback.remaining_time))
-
-    def goal_response_callback(self, future):
+    # Depth
+    def depth_goal_response_callback(self, future):
         # Checking if the goal is accepted or rejected
         goal_handle = future.result()
         if not goal_handle.accepted:
@@ -202,8 +186,39 @@ class Mission(Node):
         self.get_logger().info('Goal accepted!')
 
         # Waiting for the action's result
-        self._get_result_future = goal_handle.get_result_async()
-        self._get_result_future.add_done_callback(self.get_result_callback)
+        self._depth_get_result_future = goal_handle.get_result_async()
+        self._depth_get_result_future.add_done_callback(self.get_result_callback)
+
+    def depth_feedback_callback(self, feedback_msg):
+        # Getting feedback
+        feedback = feedback_msg.feedback
+        self.get_logger().info(f"Depth feedback: remaining_time={feedback.remaining_time.sec + 1e-9 * feedback.remaining_time.nanosec}s depth_error={feedback.depth_error}")
+
+
+    # Immersion
+    def send_immersion_goal(self):
+        immerse_msg = Immerse.Goal()
+
+        self.immerse_action_client.wait_for_server()
+        self._immerse_send_goal_future = self.immerse_action_client.send_goal_async(immerse_msg, feedback_callback=self.immerse_feedback_callback)
+        self._immerse_send_goal_future.add_done_callback(self.immerse_goal_response_callback)
+
+    def immerse_feedback_callback(self, feedback_msg):
+        # Getting feedback
+        feedback = feedback_msg.feedback
+        self.get_logger().info('Remaining immersion time: {0}'.format(feedback.remaining_time))
+
+    def immerse_goal_response_callback(self, future):
+        # Checking if the goal is accepted or rejected
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().info('Goal rejected!')
+            return
+        self.get_logger().info('Goal accepted!')
+
+        # Waiting for the action's result
+        self._immerse_get_result_future = goal_handle.get_result_async()
+        self._immerse_get_result_future.add_done_callback(self.get_result_callback)
 
     def get_result_callback(self, future):
         # Executing next fsm state
