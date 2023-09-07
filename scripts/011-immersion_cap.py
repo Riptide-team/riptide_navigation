@@ -69,6 +69,9 @@ class Mission(Node):
         # Action client
         self.immerse_action_client = ActionClient(self, Immerse, '/immersion_controller/immerse')
 
+        # Action client
+        self.depth_action_client = ActionClient(self, Immerse, '/depth_controller/immerse')
+
         # Creating the controller loader
         self.controller_manager_service = '/controller_manager/switch_controller'
         self.switch_controller = self.create_client(SwitchController, self.controller_manager_service)
