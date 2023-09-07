@@ -57,7 +57,7 @@ class Mission(Node):
         self.imu_msg = Imu()
         self.imu_subscriber = self.create_subscription(
             Imu,
-            '/imu_broadcaster/imu_status',
+            '/imu_broadcaster/imu',
             self.imu_callback,
             10
         )
@@ -77,7 +77,7 @@ class Mission(Node):
             self.get_logger().info(f'Controller manager not available at {self.controller_manager_service}')
 
         # Loading immersion_controller
-        self.switch_controller(["immersion_controller"], [])
+        self.call_switch_controller(["immersion_controller"], [])
         
         self.get_logger().info("Waiting for RC to give misison multiplexer time")
 
@@ -102,7 +102,7 @@ class Mission(Node):
             self.get_logger().info(f"Launching the mission! RH is the chef for the next {msg.remaining_time}")
             self.execute_fsm()
 
-    def switch_controller(self, activate_controllers, deactivate_controllers):
+    def call_switch_controller(self, activate_controllers, deactivate_controllers):
         req = SwitchController.Request()
         req.activate_controllers = activate_controllers
         req.deactivate_controllers = deactivate_controllers
