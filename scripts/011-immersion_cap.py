@@ -78,7 +78,7 @@ class Mission(Node):
             self.get_logger().info(f'Controller manager not available at {self.controller_manager_service}')
 
         # Loading immersion_controller
-        self.call_switch_controller([], ["riptide_controller", "log_controller", "depth_controller"])
+        self.call_switch_controller([], ["immersion_controller"])
         
         self.get_logger().info("Waiting for RC to give misison multiplexer time")
 
