@@ -110,7 +110,7 @@ class Mission(Node):
 
     def multiplexer_callback(self, msg):
         self.msg_multiplexer = msg
-        if self.msg.automatic and self.msg.remaining_time > self.msg_multiplexer.remaining_time:
+        if msg.automatic and msg.remaining_time > self.msg_multiplexer.remaining_time:
             self.get_logger().info(f"Multiplexer time set to {msg.remaining_time}s")
 
     def call_switch_controller(self, deactivate_controllers, activate_controllers):
