@@ -87,7 +87,7 @@ class Mission(Node):
         # Loading immersion_controller
         self.call_switch_controller(["immersion_controller"], ["riptide_controller", "log_controller", "depth_controller"])
         
-        self.get_logger().info("Waiting for RC to give misison multiplexer time and depth above {self.d_start}m")
+        self.get_logger().info(f"Waiting for RC to give misison multiplexer time and depth above {self.d_start}m")
 
         # Launching failsafe check
         self.failsafe_timer = self.create_timer(self.failsafe_check_timeout, self.failsafe_check)
@@ -107,11 +107,10 @@ class Mission(Node):
         if self.state == State.IDLE and msg.depth > self.d_start and self.msg_multiplexer.automatic and self.msg_multiplexer.remaining_time > 5:
             self.get_logger().info(f'Current depth {msg.depth} > start_depth = {self.d_start}: Launching!')
             self.execute_fsm()
-        
 
     def multiplexer_callback(self, msg):
         self.msg_multiplexer = msg
-        if self.msg_multiplexer.automatic and self.msg_multiplexer.remaining_time < msg.remaining_time:
+        if self.msg.automatic and self.msg.remaining_time > self.msg_multiplexer.remaining_time:
             self.get_logger().info(f"Multiplexer time set to {msg.remaining_time}s")
 
     def call_switch_controller(self, deactivate_controllers, activate_controllers):
