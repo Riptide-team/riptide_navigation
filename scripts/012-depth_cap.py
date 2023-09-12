@@ -100,7 +100,7 @@ class Mission(Node):
             self.get_logger().warn(f'Current pressure {msg.depth} > d_max = {self.d_max}: Aborting!')
             self.state = State.FAILSAFE
             self.execute_fsm()
-        if self.state == State.IDLE and self.pressure > self.d_start:
+        if self.state == State.IDLE and msg.depth > self.d_start:
             self.get_logger().warn(f'Current pressure {msg.depth} > start_depth = {self.d_max}: Launching!')
             self.execute_fsm()
         self.current_depth = msg.depth
