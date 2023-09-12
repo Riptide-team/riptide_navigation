@@ -58,6 +58,7 @@ install(PROGRAMS
   scripts/008-cap.py
   scripts/010-immersion.py
   scripts/011-immersion_cap.py
+  scripts/012-depth_cap.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
