@@ -68,7 +68,7 @@ class Mission(Node):
             10
         )
 
-        self.multiplexer_msg = Multiplexer()
+        self.msg_multiplexer = Multiplexer()
 
         # State publisher
         self.state_publisher = self.create_publisher(String, "~/mission/state", 10)
@@ -109,8 +109,8 @@ class Mission(Node):
         self.last_pressure_time = Time.from_msg(msg.header.stamp)
 
     def multiplexer_callback(self, msg):
-        self.multiplexer_msg = msg
-        if self.multiplexer_msg.automatic and self.multiplexer_msg.remaining_time < msg.remaining_time:
+        self.msg_multiplexer = msg
+        if self.msg_multiplexer.automatic and self.msg_multiplexer.remaining_time < msg.remaining_time:
             self.get_logger().info(f"Multiplexer time set to {msg.remaining_time}s")
 
     def call_switch_controller(self, deactivate_controllers, activate_controllers):
