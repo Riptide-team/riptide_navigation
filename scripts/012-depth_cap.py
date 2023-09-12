@@ -68,6 +68,8 @@ class Mission(Node):
             10
         )
 
+        self.multiplexer_msg = Multiplexer()
+
         # State publisher
         self.state_publisher = self.create_publisher(String, "~/mission/state", 10)
 
@@ -100,17 +102,16 @@ class Mission(Node):
             self.get_logger().warn(f'Current pressure {msg.depth} > d_max = {self.d_max}: Aborting!')
             self.state = State.FAILSAFE
             self.execute_fsm()
-        if self.state == State.IDLE and msg.depth > self.d_start:
+        if self.state == State.IDLE and msg.depth > self.d_start and self.msg_multiplexer.automatic and self.msg_multiplexer.remaining_time > 5:
             self.get_logger().warn(f'Current pressure {msg.depth} > start_depth = {self.d_max}: Launching!')
             self.execute_fsm()
         self.current_depth = msg.depth
         self.last_pressure_time = Time.from_msg(msg.header.stamp)
 
     def multiplexer_callback(self, msg):
-        if self.state == State.IDLE and msg.automatic and msg.remaining_time > 5:
-            self.get_logger().info(f"Launching the mission! RH is the chef for the next {msg.remaining_time}")
-            self.get_logger().info(f"Waiting for the pressure to reach {self.d_start}m")
-            # self.execute_fsm()
+        self.multiplexer_msg = msg
+        if self.multiplexer_msg.automatic and self.multiplexer_msg.remaining_time < msg.remaining_time:
+            self.get_logger().info(f"Multiplexer time set to {msg.remaining_time}s")
 
     def call_switch_controller(self, deactivate_controllers, activate_controllers):
         req = SwitchController.Request()
