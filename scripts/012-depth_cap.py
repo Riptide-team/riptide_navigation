@@ -98,15 +98,16 @@ class Mission(Node):
         self.R = R.from_quat([msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w]).as_matrix()
 
     def pressure_callback(self, msg):
+        self.current_depth = msg.depth
+        self.last_pressure_time = Time.from_msg(msg.header.stamp)
         if self.state != State.FAILSAFE and msg.depth > self.d_max:
             self.get_logger().warn(f'Current pressure {msg.depth} > d_max = {self.d_max}: Aborting!')
             self.state = State.FAILSAFE
             self.execute_fsm()
         if self.state == State.IDLE and msg.depth > self.d_start and self.msg_multiplexer.automatic and self.msg_multiplexer.remaining_time > 5:
-            self.get_logger().warn(f'Current pressure {msg.depth} > start_depth = {self.d_max}: Launching!')
+            self.get_logger().warn(f'Current depth {msg.depth} > start_depth = {self.d_start}: Launching!')
             self.execute_fsm()
-        self.current_depth = msg.depth
-        self.last_pressure_time = Time.from_msg(msg.header.stamp)
+        
 
     def multiplexer_callback(self, msg):
         self.msg_multiplexer = msg
