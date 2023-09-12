@@ -87,7 +87,7 @@ class Mission(Node):
         # Loading immersion_controller
         self.call_switch_controller(["immersion_controller"], ["riptide_controller", "log_controller", "depth_controller"])
         
-        self.get_logger().info("Waiting for RC to give misison multiplexer time")
+        self.get_logger().info("Waiting for RC to give misison multiplexer time and depth above {self.d_start}m")
 
         # Launching failsafe check
         self.failsafe_timer = self.create_timer(self.failsafe_check_timeout, self.failsafe_check)
@@ -105,7 +105,7 @@ class Mission(Node):
             self.state = State.FAILSAFE
             self.execute_fsm()
         if self.state == State.IDLE and msg.depth > self.d_start and self.msg_multiplexer.automatic and self.msg_multiplexer.remaining_time > 5:
-            self.get_logger().warn(f'Current depth {msg.depth} > start_depth = {self.d_start}: Launching!')
+            self.get_logger().info(f'Current depth {msg.depth} > start_depth = {self.d_start}: Launching!')
             self.execute_fsm()
         
 
@@ -149,7 +149,6 @@ class Mission(Node):
         elif self.state == State.IDLE:
             msg.data = "Cap"
             self.state = State.CAP
-            self.call_switch_controller(["immersion_controller"], ["riptide_controller", "log_controller", "depth_controller"])
             self.send_depth_goal()
             self.get_logger().info("State Cap")
 
@@ -189,7 +188,7 @@ class Mission(Node):
     def depth_feedback_callback(self, feedback_msg):
         # Getting feedback
         feedback = feedback_msg.feedback
-        self.get_logger().info("Feedback toto")
+        self.get_logger().info("Feedback")
         self.get_logger().info(f"Depth feedback: remaining_time={feedback.remaining_time.sec + 1e-9 * feedback.remaining_time.nanosec}s depth_error={feedback.depth_error}")
 
     def get_result_callback(self, future):
