@@ -22,8 +22,9 @@ class State(Enum):
     IDLE      = 0
     IMMERSE   = 1
     CAP       = 2
-    END       = 3
-    FAILSAFE  = 4
+    SURFACE   = 3
+    END       = 4
+    FAILSAFE  = 5
 
 
 class Mission(Node):
@@ -152,6 +153,12 @@ class Mission(Node):
             self.get_logger().info("State Cap")
 
         elif self.state == State.CAP:
+            msg.data = "Surface"
+            self.state = State.CAP
+            self.send_depth_goal()
+            self.get_logger().info("State Surface")
+
+        elif self.state == State.SURFACE:
             msg.data = "END"
             self.state = State.END
             self.get_logger().info("End of mission")
@@ -162,7 +169,10 @@ class Mission(Node):
     def send_depth_goal(self):
         depth_msg = Depth.Goal()
 
-        depth_msg.depth = self.requested_depth
+        if self.state == State.CAP:
+            depth_msg.depth = self.requested_depth
+        else:
+            depth_msg.depth = 0.
         depth_msg.timeout.sec = int(self.timeout_depth_sec)
 
         self.get_logger().info(f"Sending depth goal: depth={depth_msg.depth} timeout={depth_msg.timeout.sec}s")
