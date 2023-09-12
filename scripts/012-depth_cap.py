@@ -190,7 +190,7 @@ class Mission(Node):
         self.get_logger().info("Feedback")
         self.get_logger().info(f"Depth feedback: remaining_time={feedback.remaining_time.sec + 1e-9 * feedback.remaining_time.nanosec}s depth_error={feedback.depth_error}")
 
-    def get_result_callback(self, future):
+    def depth_get_result_callback(self, future):
         # Executing next fsm state
         self.execute_fsm()
 
