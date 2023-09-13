@@ -34,8 +34,8 @@ class Mission(Node):
         self.state = State.IDLE
 
         # Requested depth
-        self.requested_depth = 1.
-        self.timeout_depth_sec = 10.
+        self.requested_depth = .5
+        self.timeout_depth_sec = 20.
 
         # Messages timestamp failsafe
         self.failsafe_check_timeout = 3.0
@@ -171,9 +171,10 @@ class Mission(Node):
 
         if self.state == State.CAP:
             depth_msg.depth = self.requested_depth
+            depth_msg.timeout.sec = int(self.timeout_depth_sec)
         else:
             depth_msg.depth = 0.
-        depth_msg.timeout.sec = int(self.timeout_depth_sec)
+            depth_msg.timeout.sec = int(5)
 
         self.get_logger().info(f"Sending depth goal: depth={depth_msg.depth} timeout={depth_msg.timeout.sec}s")
 
