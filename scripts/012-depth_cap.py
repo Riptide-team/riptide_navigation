@@ -154,7 +154,7 @@ class Mission(Node):
 
         elif self.state == State.CAP:
             msg.data = "Surface"
-            self.state = State.CAP
+            self.state = State.SURFACE
             self.send_depth_goal()
             self.get_logger().info("State Surface")
 
