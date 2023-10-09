@@ -24,7 +24,6 @@ class State(Enum):
     END       = 2
     FAILSAFE  = 3
 
-
 class Mission(Node):
 
     def __init__(self):

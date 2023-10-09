@@ -59,6 +59,7 @@ install(PROGRAMS
   scripts/010-immersion.py
   scripts/011-immersion_cap.py
   scripts/012-depth_cap.py
+  scripts/pymavlink_bridge.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
