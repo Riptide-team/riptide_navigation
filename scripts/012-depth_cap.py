@@ -44,7 +44,7 @@ class Mission(Node):
 
         # Pressure monitoring
         self.d_max = 5.
-        self.d_start = 0.5
+        self.d_start = .5
         self.subscription = self.create_subscription(
             Pressure,
             '/pressure_broadcaster/pressure_status',
